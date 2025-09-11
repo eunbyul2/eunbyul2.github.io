@@ -1,6 +1,8 @@
+---
 layout: categories
 icon: fas fa-stream
 order: 1
+---
 
 ## 주요 카테고리
 
@@ -14,3 +16,4 @@ order: 1
 - ArgoCD
 - Harbor
 - Cilium
+- 회고
