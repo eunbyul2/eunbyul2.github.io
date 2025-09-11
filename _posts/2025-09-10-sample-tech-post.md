@@ -7,8 +7,6 @@ tags: [mlops, ai, kubernetes, openstack, ceph, devops, network, security, openso
 published: true
 ---
 
-> 마지막 수정: {{ page.last_modified_at }}
-
 # 기술 블로그를 시작합니다!
 
 이 블로그에서는 MLops, AI, 인프라, 쿠버네티스, 오픈스택, Ceph, DevOps, 네트워크, 보안 등 다양한 실전 경험과 기술을 정리하고 기록하여 공유합니다.

@@ -4,26 +4,31 @@ title: "쿠버네티스 kube-proxy와 iptables/IPVS, DNAT, RR/LC까지: 트래�
 date: 2025-09-11 15:25:00 +0900
 categories: [kubernetes, networking]
 tags: [kube-proxy, iptables, ipvs, kubernetes, network]
-published: false
+published: true
+---
 
-> 마지막 수정: {{ page.last_modified_at }}
+kube-proxy의 동작 원리와 iptables, ipvs의 차이점 정리
+
+- kube-proxy: 서비스 트래픽을 노드로 라우팅
+- iptables: 패킷 필터링 및 NAT
+- ipvs: 고성능 로드밸런싱
 
 ---
 
-# 개요 (TL;DR)
+# 개요
 
-- **kube-proxy**는 직접 패킷을 중계하지 않는다. 대신 **리눅스 커널**에 규칙을 심어 **Service IP → Pod IP**로 트래픽을 분산시킨다.  
-- 구현 방식은 두 가지: **iptables 모드**(DNAT 규칙 체인) vs **IPVS 모드**(커널 L4 로드밸런서).  
-- **DNAT**는 목적지 IP/Port를 Pod로 바꾸는 동작. NodePort/ClusterIP/LoadBalancer 모두 이 원리를 쓴다.  
-- **IPVS**는 RR(라운드로빈), LC(최소 연결) 등 **여러 스케줄러**를 제공하며, **대규모 서비스/엔드포인트**에서 성능 우위.  
+- **kube-proxy**는 직접 패킷을 중계하지 않는다. 대신 **리눅스 커널**에 규칙을 심어 **Service IP → Pod IP**로 트래픽을 분산시킨다.
+- 구현 방식은 두 가지: **iptables 모드**(DNAT 규칙 체인) vs **IPVS 모드**(커널 L4 로드밸런서).
+- **DNAT**는 목적지 IP/Port를 Pod로 바꾸는 동작. NodePort/ClusterIP/LoadBalancer 모두 이 원리를 쓴다.
+- **IPVS**는 RR(라운드로빈), LC(최소 연결) 등 **여러 스케줄러**를 제공하며, **대규모 서비스/엔드포인트**에서 성능 우위.
 - **세션 어피니티(ClientIP)**, **externalTrafficPolicy(Local/Cluster)**, **헤어핀(Hairpin) NAT**, **토폴로지 친화 라우팅** 등 운영 옵션까지 알아야 실무에서 삽질이 줄어든다.
 
 ---
 
 ## 1) kube-proxy가 하는 일
 
-- 각 노드에서 실행되는 데몬(DaemonSet).  
-- API 서버에서 **Service** 및 **EndpointSlice**(혹은 Endpoints) 변화를 워치하고, 그에 맞춰 **커널 규칙**을 갱신한다.  
+- 각 노드에서 실행되는 데몬(DaemonSet).
+- API 서버에서 **Service** 및 **EndpointSlice**(혹은 Endpoints) 변화를 워치하고, 그에 맞춰 **커널 규칙**을 갱신한다.
 - 모드:
   - `iptables`: NAT/필터 테이블 체인을 생성해 **DNAT**로 분산.
   - `ipvs`: 커널 **IPVS 가상 서비스**를 만들고 **스케줄러(RR/LC 등)** 로 분산.
@@ -50,17 +55,17 @@ spec:
   selector: { app: demo }
   ports:
     - name: http
-      port: 80        # Service(ClusterIP) Port
+      port: 80 # Service(ClusterIP) Port
       targetPort: 8080 # Pod Container Port
-  sessionAffinity: None   # 혹은 ClientIP
+  sessionAffinity: None # 혹은 ClientIP
 ```
 
 ---
 
 ## 3) DNAT 정확히 이해하기
 
-- **정의**: 패킷의 **목적지 주소(IP/Port)** 를 다른 주소로 바꾸는 NAT.  
-- **kube-proxy(iptables 모드)** 는 `nat` 테이블에 **KUBE-SERVICES/KUBE-SVC-*/KUBE-SEP-* 체인**을 만들고 **DNAT**으로 Pod로 보낸다.
+- **정의**: 패킷의 **목적지 주소(IP/Port)** 를 다른 주소로 바꾸는 NAT.
+- **kube-proxy(iptables 모드)** 는 `nat` 테이블에 **KUBE-SERVICES/KUBE-SVC-_/KUBE-SEP-_ 체인**을 만들고 **DNAT**으로 Pod로 보낸다.
 - 흐름(ClusterIP 예):
   1. 패킷 도착 → `PREROUTING` (nat)
   2. `KUBE-SERVICES` → `KUBE-SVC-<hash>`
@@ -69,6 +74,7 @@ spec:
 - **NodePort**의 경우 `KUBE-NODEPORTS` 체인에서 ClusterIP 경로로 연결되며, `externalTrafficPolicy`에 따라 SNAT 보존 여부가 달라진다.
 
 > 예시(개념적 예; 실제 규칙은 환경마다 상이):
+
 ```bash
 # ClusterIP에 대한 매칭
 -A PREROUTING -d 10.96.0.1/32 -p tcp --dport 80 -j KUBE-SERVICES
@@ -81,15 +87,15 @@ spec:
 -A KUBE-SEP-A -j DNAT --to-destination 10.244.1.5:8080
 ```
 
-- **Conntrack**: 첫 패킷에서 DNAT가 결정되면 **연결 추적** 덕분에 후속 패킷은 동일한 백엔드로 간다(세션 유지).  
+- **Conntrack**: 첫 패킷에서 DNAT가 결정되면 **연결 추적** 덕분에 후속 패킷은 동일한 백엔드로 간다(세션 유지).
 - **Hairpin NAT**: 같은 노드의 Pod가 **자기 자신이 속한 Service** 를 통해 자기/동료 Pod을 때릴 때 필요. kubelet `--hairpin-mode`(일반적으로 `hairpin-veth`)와 브리지/iptables 설정이 맞아야 한다.
 
 ---
 
 ## 4) IPVS: 커널 L4 로드밸런서
 
-- kube-proxy `ipvs` 모드는 커널 IPVS에 **가상 서비스(VIP:PORT)** 를 만들고, 다수의 **리얼 서버(Pod)** 를 매핑한다.  
-- **전달 방식**: kube-proxy는 일반적으로 **NAT(-m, MASQ)** 모드를 사용.  
+- kube-proxy `ipvs` 모드는 커널 IPVS에 **가상 서비스(VIP:PORT)** 를 만들고, 다수의 **리얼 서버(Pod)** 를 매핑한다.
+- **전달 방식**: kube-proxy는 일반적으로 **NAT(-m, MASQ)** 모드를 사용.
 - **주요 스케줄러(일부)**:
   - `rr`(Round Robin): 순차 분배
   - `lc`(Least Connection): 활성 연결 수 최소인 서버 선택
@@ -99,14 +105,16 @@ spec:
 - **세션 어피니티**(Service `sessionAffinity: ClientIP`) 는 IPVS **persistence**(유지시간)로 구현된다.
 
 > 상태 확인:
+
 ```bash
 ipvsadm -Ln           # 가상 서비스/백엔드 리스트
 ipvsadm -ln --stats   # 분배 통계
 lsmod | egrep 'ip_vs|nf_conntrack'
 ```
 
-**왜 IPVS가 빠른가?**  
-- iptables는 **규칙 수가 많아질수록** 체인 탐색 비용이 증가(선형/부분 확률 평가).  
+**왜 IPVS가 빠른가?**
+
+- iptables는 **규칙 수가 많아질수록** 체인 탐색 비용이 증가(선형/부분 확률 평가).
 - IPVS는 **해시 테이블** 기반으로 **O(1)에 가까운 룩업**, 커널 레벨 스케줄러로 대량 엔드포인트에 유리.
 
 ---
@@ -114,25 +122,28 @@ lsmod | egrep 'ip_vs|nf_conntrack'
 ## 5) 라운드로빈(RR) vs 최소 연결(LC) 깊게
 
 ### RR (Round Robin)
-- **규칙**: 요청 도착 순서대로 서버를 **순환 분배**.  
-- **장점**: 단순, 공평. 단기 연결/유사 부하에 적합.  
+
+- **규칙**: 요청 도착 순서대로 서버를 **순환 분배**.
+- **장점**: 단순, 공평. 단기 연결/유사 부하에 적합.
 - **주의**: HTTP/2, keep-alive, 길게 유지되는 스트림에서는 실제 부하가 균등해지지 않을 수 있음.
 
 ### LC (Least Connection)
-- **규칙**: **현재 활성 연결 수**가 가장 적은 서버 선택.  
-- **장점**: 연결 시간이 들쑥날쑥하거나 일부 요청이 무거울 때 유리.  
+
+- **규칙**: **현재 활성 연결 수**가 가장 적은 서버 선택.
+- **장점**: 연결 시간이 들쑥날쑥하거나 일부 요청이 무거울 때 유리.
 - **주의**: 초단기·무상태 트래픽에서는 RR 대비 이점이 작고, 상태 추적 비용이 있다.
 
-> 선택 가이드:  
-> - 짧고 균일한 요청 ➜ **RR**  
-> - 연결 길이/부하 편차 큼, WebSocket/HTTP2 혼재 ➜ **LC**(또는 `wlc`)  
+> 선택 가이드:
+>
+> - 짧고 균일한 요청 ➜ **RR**
+> - 연결 길이/부하 편차 큼, WebSocket/HTTP2 혼재 ➜ **LC**(또는 `wlc`)
 > - 클라이언트 IP 별 세션 스티키 필요 ➜ **`sh`** 또는 **`sessionAffinity: ClientIP`**
 
 ---
 
 ## 6) NodePort, 소스 IP 보존, SNAT
 
-- `externalTrafficPolicy: Cluster`(기본): 어떤 노드로 오든 **클러스터 임의 Pod** 로 라우팅. 필요 시 **SNAT** 되어 **원 소스 IP가 사라질 수 있음**.  
+- `externalTrafficPolicy: Cluster`(기본): 어떤 노드로 오든 **클러스터 임의 Pod** 로 라우팅. 필요 시 **SNAT** 되어 **원 소스 IP가 사라질 수 있음**.
 - `externalTrafficPolicy: Local`: **도착한 노드의 로컬 Pod** 로만 라우팅. 로컬 Pod가 없으면 드롭/ICMP. **클라이언트 소스 IP 보존**(로그/보안 정책에 유리).
 
 ```yaml
@@ -143,7 +154,7 @@ metadata:
 spec:
   type: NodePort
   selector: { app: demo }
-  externalTrafficPolicy: Local   # 소스 IP 보존
+  externalTrafficPolicy: Local # 소스 IP 보존
   ports:
     - port: 80
       targetPort: 8080
@@ -249,21 +260,21 @@ for i in $(seq 1 12); do curl -sS demo-svc.default.svc.cluster.local | grep -E '
 
 ## 11) 용어 요약(Glossary)
 
-- **DNAT**: 목적지 주소 변경. Service IP → Pod IP.  
-- **SNAT/MASQUERADE**: 소스 주소 변경. 소스 IP 보존/감춤에 영향.  
-- **IPVS**: 커널 L4 LB. `ipvsadm`으로 조회/설정. 스케줄러: `rr`, `lc`, `wrr`, `wlc`, `sh`, `dh` 등.  
-- **RR**: 순차 분배. **LC**: 활성 연결 최소 서버 선택.  
-- **EndpointSlice**: Service 백엔드 목록(확장성 개선).  
+- **DNAT**: 목적지 주소 변경. Service IP → Pod IP.
+- **SNAT/MASQUERADE**: 소스 주소 변경. 소스 IP 보존/감춤에 영향.
+- **IPVS**: 커널 L4 LB. `ipvsadm`으로 조회/설정. 스케줄러: `rr`, `lc`, `wrr`, `wlc`, `sh`, `dh` 등.
+- **RR**: 순차 분배. **LC**: 활성 연결 최소 서버 선택.
+- **EndpointSlice**: Service 백엔드 목록(확장성 개선).
 - **Hairpin NAT**: 같은 노드 Pod이 자기/동료 Pod을 **Service IP**로 접근 가능하게 하는 NAT.
 
 ---
 
 ## 12) 언제 무엇을 쓰나 (실무 선택 기준)
 
-- **엔드포인트 수가 적고 단순**: iptables로 충분.  
-- **서비스/엔드포인트가 수백~수천**: IPVS 권장(해시 기반, 낮은 지연/CPU).  
-- **소스 IP가 꼭 필요**: `externalTrafficPolicy: Local` + 로컬 백엔드 확보.  
-- **세션 고정 필요**: `sessionAffinity: ClientIP` 또는 IPVS `sh`/persistence.  
+- **엔드포인트 수가 적고 단순**: iptables로 충분.
+- **서비스/엔드포인트가 수백~수천**: IPVS 권장(해시 기반, 낮은 지연/CPU).
+- **소스 IP가 꼭 필요**: `externalTrafficPolicy: Local` + 로컬 백엔드 확보.
+- **세션 고정 필요**: `sessionAffinity: ClientIP` 또는 IPVS `sh`/persistence.
 - **HTTP/2/스트림 다수**: LC/wlc가 더 안정적일 수 있음.
 
 ---
