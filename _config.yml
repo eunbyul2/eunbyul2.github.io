@@ -29,7 +29,7 @@ github:
   username: eunbyul2 # change to your GitHub username
 
 twitter:
-  username: twitter_username # change to your Twitter username
+  username: # 필요 없으므로 비워둠
 
 social:
   # Change to your full name.
@@ -38,9 +38,7 @@ social:
   email: 01028700520eb@gmail.com # change to your email address
   links:
     - https://github.com/eunbyul2 # 깃허브 프로필
-    # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+  # Uncomment below to add more social links
 
 # Site Verification Settings
 webmaster_verifications:
