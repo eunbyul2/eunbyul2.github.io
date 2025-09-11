@@ -1,20 +1,9 @@
 ---
 layout: post
-title: "MLops · AI · 인프라 · 오픈스택 · Ceph · DevOps · 네트워크 · 보안 블로그 시작하기"
+title: "MLops, AI, Infra, OpenStack, Ceph, DevOps, Network, Security Blog Start"
 date: 2025-09-10 10:00:00 +0900
-categories: [MLops, AI, 인프라, 오픈스택, Ceph, DevOps, 네트워크, 보안]
-tags:
-  [
-    mlops,
-    ai,
-    kubernetes,
-    openstack,
-    ceph,
-    devops,
-    network,
-    security,
-    opensource,
-  ]
+categories: [mlops, ai, infra, openstack, ceph, devops, network, security]
+tags: [mlops, ai, kubernetes, openstack, ceph, devops, network, security, opensource]
 published: true
 ---
 
@@ -22,7 +11,7 @@ published: true
 
 # 기술 블로그를 시작합니다!
 
-이 블로그에서는 MLops, AI, 인프라, 쿠버네티스, 오픈스택, Ceph, DevOps, 네트워크, 보안 등 다양한 실전 경험과 기술을 기록하고 공유합니다.
+이 블로그에서는 MLops, AI, 인프라, 쿠버네티스, 오픈스택, Ceph, DevOps, 네트워크, 보안 등 다양한 실전 경험과 기술을 정리하고 기록하여 공유합니다.
 
 - MLOps 파이프라인 구축 및 운영
 - AI 모델 배포 자동화
@@ -31,5 +20,3 @@ published: true
 - DevOps, GitLab, ArgoCD, Harbor 활용
 - 네트워크(Cilium 등)와 보안
 - 오픈소스 프로젝트 실습 및 기여
-
-앞으로 다양한 기술과 경험을 꾸준히 기록할 예정입니다. 많은 관심 부탁드립니다!
