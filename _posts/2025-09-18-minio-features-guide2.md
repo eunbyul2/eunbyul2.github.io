@@ -89,13 +89,8 @@ mc admin config get myminio
 
 ### 1-8) 참고 (문서 경로/키워드)
 
-- [개요/설치/운영 인덱스](https://min.io/docs/minio/linux/)
-- [Erasure Coding 개념](https://min.io/docs/minio/windows/operations/concepts/erasure-coding.html)
-- [Healing/Scanner 개념](https://min.io/docs/minio/macos/operations/concepts/scanner.html)
-- [컨테이너 배포 가이드(포트 예시 9000/9001)](https://min.io/docs/minio/container/installation/deploy-minio-as-a-container.html)
-<!-- if path changes, search "Deploy MinIO as a Container" -->
-
-> 일부 페이지는 OS별 경로(macOS/Windows/Container)로 제공되지만, **개념은 공통**. 경로 차이는 문서 구조상 선택지일 뿐임.
+- [MinIO 공식 문서](https://docs.min.io/)
+- [컨테이너 배포 가이드](https://docs.min.io/community/minio-object-store/operations/deployments/baremetal-deploy-minio-as-a-container.html)
 
 ---
 
@@ -156,12 +151,12 @@ mc replicate resync  siteA/mybucket
 ### 2-7) 모니터링/운영
 
 - `mc admin trace -v --status-code 5xx`로 실패 추적.
-- (K8s) 공식 **Active‑Active 튜토리얼**로 구성 확인.
+- Grafana 복제 대시보드로 백로그 모니터링.
 
 ### 2-8) 참고
 
-- [복제 요구사항 (OpenShift)](https://min.io/docs/minio/kubernetes/openshift/administration/bucket-replication/bucket-replication-requirements.html)
-- [일방향 규칙 추가 (OpenShift)](https://min.io/docs/minio/kubernetes/openshift/administration/bucket-replication/enable-server-side-one-way-bucket-replication.html)
+- [버킷 복제 개요 (Linux)](https://min.io/docs/minio/linux/administration/bucket-replication.html)
+- [복제 요구사항](https://min.io/docs/minio/kubernetes/openshift/administration/bucket-replication/enable-server-side-one-way-bucket-replication.html)
 - [양방향 튜토리얼 (GKE)](https://min.io/docs/minio/kubernetes/gke/administration/bucket-replication/enable-server-side-two-way-bucket-replication.html)
 - [원격 재동기화 (Upstream)](https://min.io/docs/minio/kubernetes/upstream/administration/bucket-replication/server-side-replication-resynchronize-remote.html)
 
