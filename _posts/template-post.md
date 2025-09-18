@@ -2,7 +2,52 @@ layout: post
 title: "여기에 글 제목을 입력하세요"
 date: YYYY-MM-DD HH:MM:SS +0900
 categories: [여기에_카테고리1, 여기에_카테고리2]
+"""
+## 주요 카테고리
+
+- 웹 개발
+- Python
+- 프로젝트
+- DevOps
+- MLOps
+- AI
+_ Infra
+- Network
+- Security
+- GitLab
+- ArgoCD
+- Harbor
+- Cilium
+- Kubernetes
+- MinIO
+- Gitlab
+- 회고
+"""
 tags: [여기에_태그1, 여기에_태그2]
+"""
+## 주요 태그
+
+- frontend
+- backend
+- tip
+- mlops
+- ai
+- infra
+- kubernetes
+- openstack
+- ceph
+- minio
+- devops
+- automation
+- monitoring
+- network
+- security
+- gitlab
+- argocd
+- harbor
+- cilium
+- 회고
+"""
 published: false
 
 > 마지막 수정: {{ page.last_modified_at }}

@@ -2,6 +2,7 @@
 layout: post
 title: "쿠버네티스 Context & Namespace"
 date: 2025-09-11 11:11:00 +0900
+categories: [Kubernetes, Network, Infra]
 tags: [kubernetes, context, namespace, default, guide]
 published: true
 ---

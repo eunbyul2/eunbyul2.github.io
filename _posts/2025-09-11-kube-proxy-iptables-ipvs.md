@@ -2,7 +2,7 @@
 layout: post
 title: "쿠버네티스 kube-proxy와 iptables/IPVS, DNAT, RR/LC까지: 트래픽 분산"
 date: 2025-09-11 15:25:00 +0900
-categories: [kubernetes, networking]
+categories: [kubernetes, Network]
 tags: [kube-proxy, iptables, ipvs, kubernetes, network]
 published: true
 ---

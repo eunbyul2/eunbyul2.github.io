@@ -9,7 +9,16 @@ order: 2
 - frontend
 - backend
 - tip
+- mlops
+- ai
+- infra
+- kubernetes
+- openstack
+- ceph
+- minio
 - devops
+- automation
+- monitoring
 - network
 - security
 - gitlab
