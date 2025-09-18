@@ -89,6 +89,7 @@ mc admin config get myminio
 
 ### 1-8) 참고 (문서 경로/키워드)
 
+- [What is MinIO](https://www.youtube.com/watch?v=m0suyfBuaDg&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=1)
 - [MinIO 공식 문서](https://docs.min.io/)
 - [컨테이너 배포 가이드](https://docs.min.io/community/minio-object-store/operations/deployments/baremetal-deploy-minio-as-a-container.html)
 
@@ -155,9 +156,9 @@ mc replicate resync  siteA/mybucket
 
 ### 2-8) 참고
 
+- [MinIO Feature Overview: Active-Active Replication](https://www.youtube.com/watch?v=7EJO_iRiB2s&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=2)
 - [버킷 복제 개요 (Linux)](https://min.io/docs/minio/linux/administration/bucket-replication.html)
 - [복제 요구사항](https://min.io/docs/minio/kubernetes/openshift/administration/bucket-replication/enable-server-side-one-way-bucket-replication.html)
-- [양방향 튜토리얼 (GKE)](https://min.io/docs/minio/kubernetes/gke/administration/bucket-replication/enable-server-side-two-way-bucket-replication.html)
 - [원격 재동기화 (Upstream)](https://min.io/docs/minio/kubernetes/upstream/administration/bucket-replication/server-side-replication-resynchronize-remote.html)
 
 ---
@@ -218,8 +219,8 @@ mc ilm rule ls myminio/<BUCKET> --transition
 
 ### 3-8) 참고
 
+- [MinIO Feature Overview: Object Lifecycle Management](https://www.youtube.com/watch?v=bZsNxeuzmYc&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=3)
 - [ILM 개요 (Linux)](https://min.io/docs/minio/linux/administration/object-management/object-lifecycle-management.html)
-- [S3 전환 튜토리얼 (Container 예시)](https://min.io/docs/minio/container/administration/object-management/transition-objects-to-s3.html)
 
 ---
 
@@ -273,8 +274,9 @@ mc legalhold info myminio/<BUCKET>/path/to/object
 
 ### 4-8) 참고
 
-- [Object Locking (Object Retention)](https://min.io/docs/minio/macos/administration/object-management/object-retention.html)  
-  _(플랫폼 경로가 macOS로 표기되어도 개념/명령은 동일. 환경별 세부 옵션은 해당 OS 페이지 참조.)_
+-[MinIO Object Locking](https://www.youtube.com/watch?v=CtIJR5IHPyA&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=4)
+
+- [Object Locking and Immutability](https://docs.min.io/enterprise/aistor-object-store/administration/object-locking-and-immutability/)
 
 ---
 
@@ -316,7 +318,7 @@ minio server /mnt/data --console-address ":9001"
 
 ### 5-8) 참고
 
-- [콘솔에서 오브젝트 관리 (예시)](https://min.io/docs/minio/macos/administration/console/managing-objects.html)
+-[MinIO Enterprise Object Store - Console](https://www.youtube.com/watch?v=stWnxkERo6M&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=5)
 
 ---
 
@@ -363,9 +365,10 @@ mc admin prometheus metrics myminio | head
 
 ### 6-8) 참고
 
-- [모니터링 (개요, AKS)](https://min.io/docs/minio/kubernetes/aks/administration/monitoring.html)
-- [Grafana 가이드 (예시)](https://min.io/docs/minio/macos/operations/monitoring/grafana.html)
-
+- [MinIO Enterprise Object Store - Observability](https://www.youtube.com/watch?v=BScxVpcPy9Q&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=6)
+- [Monitoring and Alerting using Prometheus](https://docs.min.io/community/minio-object-store/operations/monitoring/collect-minio-metrics-using-prometheus.html)
+- [Monitor a MinIO Server with Grafana](https://docs.min.io/community/minio-object-store/operations/monitoring/grafana.html)
+- [How To Deploy Grafana Loki and Save Data to MinIO](https://blog.min.io/how-to-grafana-loki-minio/)
 ---
 
 ## 7) Catalog (메타데이터 탐색·일괄 작업)
@@ -414,8 +417,9 @@ mc sql --recursive --query "SELECT * FROM S3Object s WHERE s.col='foo'" \
 
 ### 7-8) 참고
 
-- [콘솔로 오브젝트 관리](https://min.io/docs/minio/macos/administration/console/managing-objects.html)
-- [Batch Framework (레퍼런스/잡 종류)](https://min.io/docs/minio/kubernetes/aks/administration/batch-framework-job-replicate.html)
+- [MinIO Enterprise Object Store - Catalog](https://www.youtube.com/watch?v=fUf9gnteiLA&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=7)
+- [minio 콘솔 세팅](https://docs.min.io/community/minio-object-store/reference/minio-server/settings/console.html)
+- [Batch Framework](https://docs.min.io/enterprise/aistor-object-store/administration/batch-framework/)
 - `mc sql`: _문서 UI 구조상 OS별 레퍼런스 경로를 검색해 사용_
 
 ---
@@ -459,6 +463,7 @@ mc support perf drive myminio
 
 ### 8-8) 참고
 
+- [MinIO Enterprise Object Store - Cache](https://www.youtube.com/watch?v=UcYsfmaXsXI&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=8)
 - [메모리 요구사항/권장 HW](https://min.io/docs/minio/linux/administration/object-management/data-compression.html) <!-- compression 문서 내 HW/성능 언급; 캐시 전용 페이지는 아카이브/개편될 수 있음 → 공식 문서 기준 확인 필요 -->
 
 > 캐시 전용 상세 문서는 개편 시 경로가 바뀔 수 있음(“공식 문서 기준 확인 필요”).
@@ -501,11 +506,7 @@ sudo firewall-cmd --reload
 
 ### 9-7) 참고
 
-- [K8s(OpenShift) 노출 예시/Route (복제 요구사항 하단 안내)](https://min.io/docs/minio/kubernetes/openshift/administration/bucket-replication/bucket-replication-requirements.html)
-- [컨테이너 포트 바인딩 예시](https://min.io/docs/minio/container/installation/deploy-minio-as-a-container.html)
-- [TLS 네트워크 암호화 (플랫폼별)](https://min.io/docs/minio/kubernetes/upstream/administration/server-side-encryption.html)
-
-> “Firewall” 전용 문서는 없음. 대신 **보안 체크리스트/네트워크 암호화/TLS 구성**을 준수.
+- [MinIO Enterprise Object Store - Firewall](https://www.youtube.com/watch?v=GodMeUyqWCA&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=9)
 
 ---
 
@@ -555,9 +556,10 @@ mc encrypt info myminio/<BUCKET>
 
 ### 10-8) 참고
 
-- [SSE 개요 (Linux)](https://min.io/docs/minio/linux/operations/server-side-encryption.html)
-- [SSE-C (EKS)](https://min.io/docs/minio/kubernetes/eks/administration/server-side-encryption/server-side-encryption-sse-c.html)
-- [SSE-S3 (GKE)](https://min.io/docs/minio/kubernetes/gke/administration/server-side-encryption/server-side-encryption-sse-s3.html)
+- [MinIO Enterprise Object Store - Key Management Server](https://www.youtube.com/watch?v=z6_RN6Q8JEE&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=10)
+- [SSE](https://docs.min.io/community/minio-object-store/operations/server-side-encryption.html)
+- [SSE-C (EKS)](https://www.min.io/product/aistor/multicloud-elastic-kubernetes-service)
+- [SSE-S3 (GKE)](https://www.min.io/product/aistor/multicloud-google-kubernetes-service)
 
 ---
 
@@ -604,7 +606,9 @@ mc admin scanner trace  myminio
 
 ### 11-8) 참고
 
-- [Erasure Coding 개념](https://min.io/docs/minio/windows/operations/concepts/erasure-coding.html)
-- [Scanner/Healing 개념](https://min.io/docs/minio/macos/operations/concepts/scanner.html)
+- [MinIO Architecture: PUT and GET Requests](https://www.youtube.com/watch?v=GNBWHjB7PP0&list=PLFOIsHSSYIK2XrdJHE6JGRn8XgXfBhdgA&index=11)
+- [Erasure Coding 개념](https://docs.min.io/community/minio-object-store/operations/concepts/erasure-coding.html)
+- [Healing 개념](https://docs.min.io/community/minio-object-store/operations/concepts/healing.html)
+- [Scanner 개념](https://docs.min.io/community/minio-object-store/operations/concepts/scanner.html)
 
 ---
