@@ -1,8 +1,11 @@
+---
 layout: post
 title: "여기에 글 제목을 입력하세요"
 date: YYYY-MM-DD HH:MM:SS +0900
 categories: [여기에_카테고리1, 여기에_카테고리2]
-"""
+published: false
+---
+
 ## 주요 카테고리
 
 - 웹 개발
@@ -10,7 +13,7 @@ categories: [여기에_카테고리1, 여기에_카테고리2]
 - 프로젝트
 - DevOps
 - MLOps
-- AI
+- AIS
 _ Infra
 - Network
 - Security
