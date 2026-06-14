@@ -1416,6 +1416,513 @@ DB라면 다음이 더 효과적일 수 있다.
 
 ---
 
+## 19. Amazon EBS 성능 공식 문서 기준 추가 진단 포인트
+
+AWS 공식 문서에서는 단순히 CloudWatch 지표만 보는 것이 아니라 EBS 성능에 영향을 주는 다양한 요소를 함께 분석하도록 권장한다.
+
+실제 실무에서는 "EBS가 느리다"는 현상이 발생했을 때 EBS 볼륨 자체만 보는 것이 아니라 다음 항목들을 함께 확인해야 한다.
+
+---
+
+### 19-1) EBS 최적화 인스턴스 확인
+
+EBS 최적화(EBS Optimized)는 EC2와 EBS 간 전용 네트워크 대역폭을 제공하는 기능이다.
+
+EBS 최적화가 적용되지 않은 인스턴스에서는 다음 트래픽이 동일한 네트워크 자원을 공유한다.
+
+- 일반 네트워크 트래픽
+- EBS I/O 트래픽
+
+이 경우 네트워크 사용량이 증가하면 EBS 성능도 함께 저하될 수 있다.
+
+확인 방법
+
+```bash
+aws ec2 describe-instances \
+  --instance-ids i-xxxxxxxx
+```
+
+확인 항목
+
+```json
+"EbsOptimized": true
+```
+
+실무 체크포인트
+
+- EBS 최적화 미적용 여부
+- 구형 인스턴스 사용 여부
+- 인스턴스 타입 변경 이력
+- 네트워크 사용량 급증 여부
+
+---
+
+### 19-2) EC2 인스턴스 EBS 대역폭 한계 확인
+
+많은 사람들이 놓치는 부분이다.
+
+실제 EBS 성능은 다음 공식으로 결정된다.
+
+```text
+실제 성능 =
+min(EBS 볼륨 성능, EC2 EBS 성능)
+```
+
+예시
+
+```text
+gp3
+16,000 IOPS
+
+EC2
+8,000 IOPS 지원
+
+실제 가능 성능
+8,000 IOPS
+```
+
+확인 항목
+
+- 인스턴스 최대 IOPS
+- 인스턴스 최대 Throughput
+- 인스턴스 최대 EBS Bandwidth
+
+AWS 공식 문서의 EBS 성능 문제 대부분은 실제로 인스턴스 병목인 경우가 많다.
+
+대표 증상
+
+- Queue Length 증가
+- Latency 증가
+- EBS 사용률은 낮음
+- EC2 EBS 대역폭 사용률 높음
+
+---
+
+### 19-3) 스냅샷 복원 볼륨 초기화 여부 확인
+
+스냅샷에서 생성된 EBS는 생성 직후 완전한 상태가 아니다.
+
+실제 데이터 블록은 S3에서 필요 시 로딩된다.
+
+따라서 처음 접근하는 블록은 높은 지연시간이 발생할 수 있다.
+
+대표 증상
+
+- 새 볼륨만 느림
+- 특정 파일 접근 시 지연
+- 시간 지나면 정상화
+
+확인 방법
+
+```bash
+aws ec2 describe-volume-status \
+  --volume-ids vol-xxxxxxxx
+```
+
+확인 항목
+
+```text
+initialization-state
+Progress
+InitializationType
+```
+
+해결 방법
+
+- Fast Snapshot Restore
+- Provisioned Initialization Rate
+- fio 초기화
+- dd 초기화
+
+예시
+
+```bash
+sudo fio \
+  --filename=/dev/xvdf \
+  --rw=read \
+  --bs=1M \
+  --iodepth=32 \
+  --ioengine=libaio \
+  --direct=1 \
+  --name=volume-init
+```
+
+---
+
+### 19-4) I/O Size와 IOPS 계산 방식 이해
+
+EBS 성능 분석 시 가장 많이 오해하는 부분이다.
+
+IOPS는 단순 요청 개수가 아니다.
+
+I/O 크기에 따라 실제 IOPS 계산 방식이 달라진다.
+
+SSD 계열
+
+```text
+최대 I/O 크기
+256 KiB
+```
+
+예시
+
+```text
+1,024 KiB I/O
+
+=
+256 KiB × 4
+
+=
+4 IOPS
+```
+
+반대로
+
+```text
+32 KiB 순차 I/O × 8
+
+=
+256 KiB
+
+=
+1 IOPS
+```
+
+즉
+
+같은 IOPS라도
+
+- I/O Size
+- Random I/O
+- Sequential I/O
+
+에 따라 실제 성능은 크게 달라진다.
+
+---
+
+### 19-5) Queue Depth와 Latency 관계 확인
+
+Queue Depth는 현재 대기 중인 I/O 요청 수를 의미한다.
+
+AWS 공식 권장값
+
+SSD
+
+```text
+1,000 IOPS당 Queue Depth 1
+```
+
+예시
+
+```text
+3,000 IOPS
+
+권장 Queue Depth
+
+≈ 3
+```
+
+Queue Depth가 너무 낮으면
+
+```text
+성능을 충분히 활용하지 못함
+```
+
+Queue Depth가 너무 높으면
+
+```text
+Latency 증가
+```
+
+대표 지표
+
+CloudWatch
+
+```text
+VolumeQueueLength
+```
+
+Linux
+
+```bash
+iostat -xz 1
+```
+
+확인 항목
+
+```text
+aqu-sz
+await
+```
+
+---
+
+### 19-6) IOPS 병목과 Throughput 병목 구분
+
+실무에서 매우 중요하다.
+
+둘은 완전히 다른 문제다.
+
+IOPS 병목
+
+특징
+
+- 작은 랜덤 I/O
+- DB
+- 검색 엔진
+- 트랜잭션
+
+대표 증상
+
+```text
+VolumeIOPSPercentage ↑
+Queue Length ↑
+Latency ↑
+```
+
+Throughput 병목
+
+특징
+
+- 백업
+- ETL
+- 대용량 파일
+- 로그 처리
+
+대표 증상
+
+```text
+VolumeThroughputPercentage ↑
+Queue Length ↑
+Latency ↑
+```
+
+구분 기준
+
+```text
+작은 I/O → IOPS 문제
+
+큰 I/O → Throughput 문제
+```
+
+---
+
+### 19-7) HDD 계열 st1/sc1의 순차 I/O 조건 확인
+
+AWS 공식 문서에서 강조하는 내용이다.
+
+st1/sc1은 SSD처럼 사용하면 안 된다.
+
+최적 조건
+
+```text
+1 MiB Sequential I/O
+Queue Depth ≥ 4
+```
+
+부적합 조건
+
+```text
+4 KiB Random Read
+8 KiB Random Write
+DB 워크로드
+로그 폭증
+```
+
+이 경우 성능이 급격히 저하된다.
+
+확인 방법
+
+```bash
+iostat -xz 1
+```
+
+또는
+
+```bash
+fio
+```
+
+분석
+
+- 평균 I/O Size
+- Sequential 여부
+- Random 여부
+
+---
+
+### 19-8) VolumeIOPSExceededCheck와 VolumeThroughputExceededCheck 확인
+
+AWS가 제공하는 매우 유용한 지표다.
+
+VolumeIOPSExceededCheck
+
+```text
+0 = 정상
+
+1 = 프로비저닝 IOPS 초과 시도
+```
+
+VolumeThroughputExceededCheck
+
+```text
+0 = 정상
+
+1 = 프로비저닝 Throughput 초과 시도
+```
+
+활용 방법
+
+```text
+Latency 증가
++
+Queue Length 증가
++
+ExceededCheck = 1
+```
+
+이면 거의 확실하게 볼륨 성능 한계에 도달한 상태다.
+
+조치
+
+- gp3 IOPS 증가
+- gp3 Throughput 증가
+- io2 전환
+- 인스턴스 상향
+
+---
+
+### 19-9) RAID 0 사용 가능성 검토
+
+AWS 공식 문서에서도 RAID 0 사용을 권장한다.
+
+사용 목적
+
+```text
+더 높은 IOPS
+더 높은 Throughput
+```
+
+예시
+
+```text
+4,000 IOPS 볼륨 2개
+
+↓
+
+RAID0
+
+↓
+
+약 8,000 IOPS
+```
+
+Linux 예시
+
+```bash
+sudo mdadm \
+  --create \
+  /dev/md0 \
+  --level=0 \
+  --raid-devices=2 \
+  /dev/nvme1n1 \
+  /dev/nvme2n1
+```
+
+주의사항
+
+```text
+볼륨 하나 장애
+
+↓
+
+전체 RAID 손상
+```
+
+따라서
+
+- Snapshot
+- Backup
+- Multi-Volume Snapshot
+
+이 필수다.
+
+---
+
+### 19-10) fio로 벤치마킹
+
+AWS 공식 문서에서 가장 많이 사용하는 성능 측정 도구다.
+
+설치
+
+Amazon Linux
+
+```bash
+sudo yum install -y fio
+```
+
+Ubuntu
+
+```bash
+sudo apt install -y fio
+```
+
+SSD Random Read
+
+```bash
+sudo fio \
+  --directory=/data \
+  --name=test \
+  --direct=1 \
+  --rw=randread \
+  --bs=16k \
+  --size=1G \
+  --numjobs=16 \
+  --runtime=180 \
+  --time_based
+```
+
+SSD Random Write
+
+```bash
+sudo fio \
+  --directory=/data \
+  --name=test \
+  --direct=1 \
+  --rw=randwrite \
+  --bs=16k \
+  --size=1G \
+  --numjobs=16 \
+  --runtime=180 \
+  --time_based
+```
+
+HDD Sequential Read
+
+```bash
+sudo fio \
+  --filename=/dev/xvdf \
+  --direct=1 \
+  --rw=read \
+  --bs=1024k \
+  --iodepth=8 \
+  --runtime=180 \
+  --time_based
+```
+
+확인 항목
+
+- IOPS
+- Throughput(BW)
+- Latency
+- p95 Latency
+- p99 Latency
+- Queue Depth
+
+실무에서는 벤치마크 결과와 CloudWatch 지표를 함께 분석하여 실제 병목 지점을 찾는다.
+
+---
+
 ## 16. 실무용 진단 체크리스트
 
 ### 16-1) 기본 정보 확인
@@ -1487,21 +1994,496 @@ journalctl -k
 
 ---
 
-## 17. 면접 답변용 정리
+## 17. Amazon EBS 성능 공식 문서 기준 추가 진단 포인트
 
-클라우드 환경에서 EBS 같은 네트워크 스토리지 성능 이슈가 발생하면 먼저 문제가 스토리지 자체인지, EC2 인스턴스 한계인지, OS 또는 애플리케이션 문제인지 분리해야 한다.
+AWS 공식 문서에서는 단순히 CloudWatch 지표만 보는 것이 아니라 EBS 성능에 영향을 주는 다양한 요소를 함께 분석하도록 권장한다.
 
-EBS 레벨에서는 CloudWatch의 VolumeReadOps, VolumeWriteOps, VolumeReadBytes, VolumeWriteBytes, VolumeQueueLength, BurstBalance, VolumeIOPSPercentage, VolumeThroughputPercentage 등을 확인한다. QueueLength가 지속적으로 높고 IOPS 또는 Throughput 사용률이 한계에 가까우면 볼륨 성능 부족을 의심할 수 있다. gp2, st1, sc1에서는 BurstBalance 고갈 여부도 반드시 확인해야 한다.
+실제 실무에서는 "EBS가 느리다"는 현상이 발생했을 때 EBS 볼륨 자체만 보는 것이 아니라 다음 항목들을 함께 확인해야 한다.
 
-인스턴스 레벨에서는 EC2 인스턴스의 EBS 최대 대역폭과 IOPS 한계를 확인한다. 볼륨 성능은 충분하지만 await가 높거나 큐가 증가한다면 인스턴스의 EBS 대역폭 병목일 수 있다.
+### 17-1) EBS 최적화 인스턴스 확인
 
-OS 레벨에서는 iostat -xz 1로 await, r_await, w_await, aqu-sz, %util을 확인하고, iotop이나 pidstat로 어떤 프로세스가 I/O를 발생시키는지 확인한다. dmesg와 journalctl에서는 NVMe timeout, I/O error, 파일시스템 오류 여부를 확인한다.
+EBS 최적화(EBS Optimized)는 EC2와 EBS 간 전용 네트워크 대역폭을 제공하는 기능이다.
 
-최종적으로 원인이 볼륨 성능 부족이면 gp3 IOPS/Throughput 증설, gp2에서 gp3 전환, io2 사용 등을 검토한다. 인스턴스 병목이면 더 높은 EBS 대역폭을 제공하는 인스턴스로 변경한다. 애플리케이션 문제라면 쿼리 튜닝, 캐시 도입, 백업 시간 조정, 로그 정책 변경 등을 수행한다.
+EBS 최적화가 적용되지 않은 인스턴스에서는 다음 트래픽이 동일한 네트워크 자원을 공유한다.
+
+- 일반 네트워크 트래픽
+- EBS I/O 트래픽
+
+이 경우 네트워크 사용량이 증가하면 EBS 성능도 함께 저하될 수 있다.
+
+확인 방법
+
+```bash
+aws ec2 describe-instances \
+  --instance-ids i-xxxxxxxx
+```
+
+확인 항목
+
+```json
+"EbsOptimized": true
+```
+
+실무 체크포인트
+
+- EBS 최적화 미적용 여부
+- 구형 인스턴스 사용 여부
+- 인스턴스 타입 변경 이력
+- 네트워크 사용량 급증 여부
+
+### 17-2) EC2 인스턴스 EBS 대역폭 한계 확인
+
+많은 사람들이 놓치는 부분이다.
+
+실제 EBS 성능은 다음 공식으로 결정된다.
+
+```text
+실제 성능 =
+min(EBS 볼륨 성능, EC2 EBS 성능)
+```
+
+예시
+
+```text
+gp3
+16,000 IOPS
+
+EC2
+8,000 IOPS 지원
+
+실제 가능 성능
+8,000 IOPS
+```
+
+확인 항목
+
+- 인스턴스 최대 IOPS
+- 인스턴스 최대 Throughput
+- 인스턴스 최대 EBS Bandwidth
+
+AWS 공식 문서의 EBS 성능 문제 대부분은 실제로 인스턴스 병목인 경우가 많다.
+
+대표 증상
+
+- Queue Length 증가
+- Latency 증가
+- EBS 사용률은 낮음
+- EC2 EBS 대역폭 사용률 높음
+
+### 17-3) 스냅샷 복원 볼륨 초기화 여부 확인
+
+스냅샷에서 생성된 EBS는 생성 직후 완전한 상태가 아니다.
+
+실제 데이터 블록은 S3에서 필요 시 로딩된다.
+
+따라서 처음 접근하는 블록은 높은 지연시간이 발생할 수 있다.
+
+대표 증상
+
+- 새 볼륨만 느림
+- 특정 파일 접근 시 지연
+- 시간 지나면 정상화
+
+확인 방법
+
+```bash
+aws ec2 describe-volume-status \
+  --volume-ids vol-xxxxxxxx
+```
+
+확인 항목
+
+```text
+initialization-state
+Progress
+InitializationType
+```
+
+해결 방법
+
+- Fast Snapshot Restore
+- Provisioned Initialization Rate
+- fio 초기화
+- dd 초기화
+
+예시
+
+```bash
+sudo fio \
+  --filename=/dev/xvdf \
+  --rw=read \
+  --bs=1M \
+  --iodepth=32 \
+  --ioengine=libaio \
+  --direct=1 \
+  --name=volume-init
+```
+
+### 17-4) I/O Size와 IOPS 계산 방식 이해
+
+EBS 성능 분석 시 가장 많이 오해하는 부분이다.
+
+IOPS는 단순 요청 개수가 아니다.
+
+I/O 크기에 따라 실제 IOPS 계산 방식이 달라진다.
+
+SSD 계열
+
+```text
+최대 I/O 크기
+256 KiB
+```
+
+예시
+
+```text
+1,024 KiB I/O
+
+=
+256 KiB × 4
+
+=
+4 IOPS
+```
+
+반대로
+
+```text
+32 KiB 순차 I/O × 8
+
+=
+256 KiB
+
+=
+1 IOPS
+```
+
+즉
+
+같은 IOPS라도
+
+- I/O Size
+- Random I/O
+- Sequential I/O
+
+에 따라 실제 성능은 크게 달라진다.
+
+### 17-5) Queue Depth와 Latency 관계 확인
+
+Queue Depth는 현재 대기 중인 I/O 요청 수를 의미한다.
+
+AWS 공식 권장값
+
+SSD
+
+```text
+1,000 IOPS당 Queue Depth 1
+```
+
+예시
+
+```text
+3,000 IOPS
+
+권장 Queue Depth
+
+≈ 3
+```
+
+Queue Depth가 너무 낮으면
+
+```text
+성능을 충분히 활용하지 못함
+```
+
+Queue Depth가 너무 높으면
+
+```text
+Latency 증가
+```
+
+대표 지표
+
+CloudWatch
+
+```text
+VolumeQueueLength
+```
+
+Linux
+
+```bash
+iostat -xz 1
+```
+
+확인 항목
+
+```text
+aqu-sz
+await
+```
+
+### 17-6) IOPS 병목과 Throughput 병목 구분
+
+실무에서 매우 중요하다.
+
+둘은 완전히 다른 문제다.
+
+IOPS 병목
+
+특징
+
+- 작은 랜덤 I/O
+- DB
+- 검색 엔진
+- 트랜잭션
+
+대표 증상
+
+```text
+VolumeIOPSPercentage ↑
+Queue Length ↑
+Latency ↑
+```
+
+Throughput 병목
+
+특징
+
+- 백업
+- ETL
+- 대용량 파일
+- 로그 처리
+
+대표 증상
+
+```text
+VolumeThroughputPercentage ↑
+Queue Length ↑
+Latency ↑
+```
+
+구분 기준
+
+```text
+작은 I/O → IOPS 문제
+
+큰 I/O → Throughput 문제
+```
+
+### 17-7) HDD 계열 st1/sc1의 순차 I/O 조건 확인
+
+AWS 공식 문서에서 강조하는 내용이다.
+
+st1/sc1은 SSD처럼 사용하면 안 된다.
+
+최적 조건
+
+```text
+1 MiB Sequential I/O
+Queue Depth ≥ 4
+```
+
+부적합 조건
+
+```text
+4 KiB Random Read
+8 KiB Random Write
+DB 워크로드
+로그 폭증
+```
+
+이 경우 성능이 급격히 저하된다.
+
+확인 방법
+
+```bash
+iostat -xz 1
+```
+
+또는
+
+```bash
+fio
+```
+
+분석
+
+- 평균 I/O Size
+- Sequential 여부
+- Random 여부
+
+
+### 17-8) VolumeIOPSExceededCheck와 VolumeThroughputExceededCheck 확인
+
+AWS가 제공하는 매우 유용한 지표다.
+
+VolumeIOPSExceededCheck
+
+```text
+0 = 정상
+
+1 = 프로비저닝 IOPS 초과 시도
+```
+
+VolumeThroughputExceededCheck
+
+```text
+0 = 정상
+
+1 = 프로비저닝 Throughput 초과 시도
+```
+
+활용 방법
+
+```text
+Latency 증가
++
+Queue Length 증가
++
+ExceededCheck = 1
+```
+
+이면 거의 확실하게 볼륨 성능 한계에 도달한 상태다.
+
+조치
+
+- gp3 IOPS 증가
+- gp3 Throughput 증가
+- io2 전환
+- 인스턴스 상향
+
+
+### 17-9) RAID 0 사용 가능성 검토
+
+AWS 공식 문서에서도 RAID 0 사용을 권장한다.
+
+사용 목적
+
+```text
+더 높은 IOPS
+더 높은 Throughput
+```
+
+예시
+
+```text
+4,000 IOPS 볼륨 2개
+
+↓
+
+RAID0
+
+↓
+
+약 8,000 IOPS
+```
+
+Linux 예시
+
+```bash
+sudo mdadm \
+  --create \
+  /dev/md0 \
+  --level=0 \
+  --raid-devices=2 \
+  /dev/nvme1n1 \
+  /dev/nvme2n1
+```
+
+주의사항
+
+```text
+볼륨 하나 장애
+
+↓
+
+전체 RAID 손상
+```
+
+따라서
+
+- Snapshot
+- Backup
+- Multi-Volume Snapshot
+
+이 필수다.
+
+### 17-10) fio로 벤치마킹
+
+AWS 공식 문서에서 가장 많이 사용하는 성능 측정 도구다.
+
+설치
+
+Amazon Linux
+
+```bash
+sudo yum install -y fio
+```
+
+Ubuntu
+
+```bash
+sudo apt install -y fio
+```
+
+SSD Random Read
+
+```bash
+sudo fio \
+  --directory=/data \
+  --name=test \
+  --direct=1 \
+  --rw=randread \
+  --bs=16k \
+  --size=1G \
+  --numjobs=16 \
+  --runtime=180 \
+  --time_based
+```
+
+SSD Random Write
+
+```bash
+sudo fio \
+  --directory=/data \
+  --name=test \
+  --direct=1 \
+  --rw=randwrite \
+  --bs=16k \
+  --size=1G \
+  --numjobs=16 \
+  --runtime=180 \
+  --time_based
+```
+
+HDD Sequential Read
+
+```bash
+sudo fio \
+  --filename=/dev/xvdf \
+  --direct=1 \
+  --rw=read \
+  --bs=1024k \
+  --iodepth=8 \
+  --runtime=180 \
+  --time_based
+```
+
+확인 항목
+
+- IOPS
+- Throughput(BW)
+- Latency
+- p95 Latency
+- p99 Latency
+- Queue Depth
+
+실무에서는 벤치마크 결과와 CloudWatch 지표를 함께 분석하여 실제 병목 지점을 찾는다.
 
 ---
 
-## 18. 결론
+## 결론
 
 EBS 성능 이슈 진단의 핵심은 다음 네 가지다.
 
