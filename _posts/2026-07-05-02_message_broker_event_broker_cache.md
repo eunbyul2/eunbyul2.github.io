@@ -7,7 +7,7 @@ tags: [MessageQueue, EventBroker, Cache, PubSub, RabbitMQ, Kafka, Redis]
 published: true
 ---
 
-> RabbitMQ, Kafka, Redis를 제대로 비교하려면 먼저 Queue, Broker, Producer, Consumer, Topic, Offset, Cache 같은 공통 개념을 이해해야 한다. 이 문서는 제품별 설명에 들어가기 전에 반드시 알아야 하는 기초 개념을 정리한다.
+> RabbitMQ, Kafka, Redis를 제대로 비교하려면 먼저 Queue, Broker, Producer, Consumer, Topic, Offset, Cache 같은 공통 개념을 이해해야 한다.
 
 ## 1. Producer, Broker, Consumer
 

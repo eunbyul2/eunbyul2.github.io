@@ -7,7 +7,8 @@ tags: [RabbitMQ, Kafka, Redis, AMQP, EventStreaming, MessageQueue, RedisStreams]
 published: true
 ---
 
-> RabbitMQ, Kafka, Redis는 모두 메시징과 관련해 함께 비교되지만, 내부 구조와 설계 목적은 크게 다르다. 이 문서는 메시지 브로커, 이벤트 브로커, 인메모리 저장소 관점에서 세 기술의 차이를 자세히 정리한다.
+> RabbitMQ, Kafka, Redis는 모두 메시징과 관련해 함께 비교되지만, 내부 구조와 설계 목적은 크게 다르다. 
+> 메시지 브로커, 이벤트 브로커, 인메모리 저장소 관점에서 세 기술의 차이 정리해야 한다.
 
 ## 1. 한 줄 요약
 
@@ -44,6 +45,8 @@ RabbitMQ는 단순히 Queue 하나만 제공하는 도구가 아니다. Exchange
 RabbitMQ는 대표적으로 AMQP(Advanced Message Queuing Protocol)를 사용한다. AMQP는 메시징을 위한 표준 프로토콜이며, Producer, Broker, Consumer 사이의 메시지 전달 방식을 정의한다.
 
 구조적으로 보면 RabbitMQ에서는 Producer와 Broker 사이, Broker와 Consumer 사이가 AMQP 기반으로 통신한다.
+
+![rabbitmq_struxture](../img/rabbitmq_structure.png)
 
 ```text
 Producer ── AMQP ── RabbitMQ Broker ── AMQP ── Consumer
@@ -141,6 +144,8 @@ Kafka의 핵심은 메시지를 소비했다고 즉시 삭제하지 않는다는
 ### 3-2) Kafka의 통신 방식
 
 Kafka는 TCP 기반 자체 프로토콜을 사용한다. RabbitMQ가 AMQP 같은 메시징 프로토콜 중심이라면, Kafka는 고성능 로그 저장과 스트리밍 처리를 위해 자체 프로토콜과 클라이언트 생태계를 발전시켰다.
+
+![kafka_structure](../img/kafka_structure.png)
 
 ```text
 Producer ── TCP 기반 Kafka Protocol ── Kafka Broker ── TCP 기반 Kafka Protocol ── Consumer
