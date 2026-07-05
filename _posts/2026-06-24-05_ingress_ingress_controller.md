@@ -2,7 +2,7 @@
 layout: post
 title: "Kubernetes Ingress와 Ingress Controller 완전 정리: Host/Path Routing, TLS, NGINX, HAProxy, Traefik, Gateway API"
 date: 2026-06-24 20:55:00 +0900
-categories: [Kubernetes, Network]
+categories: [스터디, 인프라, Kubernetes, Network]
 tags: [Ingress, IngressController, NGINX, HAProxy, Traefik, TLS, GatewayAPI, OAuth, Keycloak]
 published: true
 ---

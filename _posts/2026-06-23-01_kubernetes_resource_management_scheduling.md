@@ -2,7 +2,7 @@
 layout: post
 title: "Kubernetes Resource Management: Request, Limit, Quota, Scheduler, Overcommit"
 date: 2026-06-23 17:30:00 +0900
-categories: [Kubernetes, Infrastructure]
+categories: [스터디, 인프라, Kubernetes, Infrastructure]
 tags: [Kubernetes, RequestLimit, ResourceQuota, LimitRange, Scheduler, QoS, Overcommit, CapacityPlanning]
 published: true
 ---

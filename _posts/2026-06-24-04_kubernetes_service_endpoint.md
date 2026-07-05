@@ -2,7 +2,7 @@
 layout: post
 title: "Kubernetes Service와 Endpoint/EndpointSlice: ClusterIP, NodePort, LoadBalancer, Headless, kube-proxy, Cilium"
 date: 2026-06-24 20:20:00 +0900
-categories: [Kubernetes, Network]
+categories: [스터디, 인프라, Kubernetes, Network]
 tags: [Kubernetes, Service, ClusterIP, NodePort, LoadBalancer, HeadlessService, Endpoint, EndpointSlice, kube-proxy, Cilium, Conntrack]
 published: true
 ---

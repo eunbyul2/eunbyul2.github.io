@@ -2,7 +2,7 @@
 layout: post
 title: "02. Message Queue, Event Broker, Cache 개념 정리"
 date: 2026-07-05 11:50:00 +0900
-categories: [Infra, Middleware, Messaging]
+categories: [스터디, 인프라, Infra, Middleware, Messaging]
 tags: [MessageQueue, EventBroker, Cache, PubSub, RabbitMQ, Kafka, Redis]
 published: true
 ---

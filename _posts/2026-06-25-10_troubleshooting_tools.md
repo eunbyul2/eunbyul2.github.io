@@ -2,7 +2,7 @@
 layout: post
 title: "네트워크 트러블슈팅 도구: curl, tcpdump, ss, traceroute, dig, nc"
 date: 2026-06-25 07:55:00 +0900
-categories: [Network, Troubleshooting]
+categories: [스터디, 인프라, Network, Troubleshooting]
 tags: [curl, tcpdump, ss, netstat, traceroute, dig, nslookup, nc, openssl, mtr, Kubernetes, Troubleshooting]
 published: true
 ---

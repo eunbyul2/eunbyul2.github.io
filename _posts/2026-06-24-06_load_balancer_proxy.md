@@ -2,7 +2,7 @@
 layout: post
 title: "Load Balancer와 Proxy: L4/L7, VIP, Health Check, Sticky Session, Failover"
 date: 2026-06-24 22:15:00 +0900
-categories: [Network, LoadBalancer]
+categories: [스터디, 인프라, Network, LoadBalancer]
 tags: [LoadBalancer, L4, L7, ReverseProxy, ForwardProxy, HealthCheck, Failover, HAProxy, NGINX, MetalLB, Envoy]
 published: true
 ---

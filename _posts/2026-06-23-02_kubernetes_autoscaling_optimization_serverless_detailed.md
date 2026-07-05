@@ -2,7 +2,7 @@
 layout: post
 title: "Kubernetes Autoscaling과 Optimization 상세 정리: HPA, VPA, Goldilocks, In-place Pod Resize, Knative"
 date: 2026-06-23 18:00:00 +0900
-categories: [Kubernetes, Infrastructure]
+categories: [스터디, 인프라, Kubernetes, Infrastructure]
 tags: [Kubernetes, HPA, VPA, Goldilocks, InPlacePodResize, Patch, Knative, Lambda, Serverless, RightSizing, Autoscaling]
 published: true
 ---

@@ -2,7 +2,7 @@
 layout: post
 title: "03. RabbitMQ, Kafka, Redis 내부 구조와 선택 기준 비교"
 date: 2026-07-05 12:40:00 +0900
-categories: [Infra, Middleware, Messaging]
+categories: [스터디, 인프라, Infra, Middleware, Messaging]
 tags: [RabbitMQ, Kafka, Redis, AMQP, EventStreaming, MessageQueue, RedisStreams]
 published: true
 ---

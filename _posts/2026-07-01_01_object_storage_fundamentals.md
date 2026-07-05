@@ -2,7 +2,7 @@
 layout: post
 title: "Object Storage와 S3 기본 원리"
 date: 2026-07-01 19:00:00 +0900
-categories: [Storage, S3, ObjectStorage]
+categories: [스터디, 인프라, Storage, S3, ObjectStorage]
 tags: [ObjectStorage, S3, Bucket, Object, Key, Prefix, Metadata, ETag, MultipartUpload, Versioning]
 published: true
 ---

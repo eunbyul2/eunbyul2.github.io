@@ -2,7 +2,7 @@
 layout: post
 title: "클라우드 환경에서 EBS 같은 네트워크 스토리지 성능 이슈는 어떻게 진단할 수 있는지?"
 date: 2026-06-13 23:00:00 +0900
-categories: [Cloud, AWS, Amazon EBS]
+categories: [스터디, 인프라, Cloud, AWS, Amazon EBS]
 tags: [Cloud, AWS, Amazon EBS]
 published: true
 ---

@@ -2,7 +2,7 @@
 layout: post
 title: "Kubernetes 네트워크 트러블슈팅: logs, describe, svc, endpoints, port-forward"
 date: 2026-06-25 08:30:00 +0900
-categories: [Kubernetes, Troubleshooting]
+categories: [스터디, 인프라, Kubernetes, Troubleshooting]
 tags: [Kubernetes, kubectl, logs, describe, ingress, svc, endpoints, endpointslice, port-forward, NetworkPolicy, CoreDNS]
 published: true
 ---

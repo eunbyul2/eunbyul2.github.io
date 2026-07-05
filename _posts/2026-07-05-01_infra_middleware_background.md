@@ -2,7 +2,7 @@
 layout: post
 title: "01. 왜 DB만으로는 부족한가: 인프라 미들웨어와 비동기 처리의 등장 배경"
 date: 2026-07-05 11:00:00 +0900
-categories: [Infra, Middleware, Messaging]
+categories: [스터디, 인프라, Infra, Middleware, Messaging]
 tags: [Middleware, MessageBroker, EventBroker, Async, Queue, Kafka, RabbitMQ, Redis]
 published: true
 ---

@@ -2,7 +2,7 @@
 layout: post
 title: "네트워크 기초: Ethernet, OSI, TCP/IP, IP, CIDR, DNS, Routing, ARP, NAT"
 date: 2026-06-24 18:20:00 +0900
-categories: [Network, Infrastructure]
+categories: [스터디, 인프라, Network, Infrastructure]
 tags: [Network, OSI, TCPIP, Ethernet, IP, CIDR, DNS, Routing, ARP, NAT, Conntrack]
 published: true
 ---

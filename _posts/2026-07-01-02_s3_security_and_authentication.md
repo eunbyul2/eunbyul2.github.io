@@ -2,7 +2,7 @@
 layout: post
 title: "S3 인증, 권한, 암호화"
 date: 2026-07-01 20:55:00 +0900
-categories: [Storage, S3, ObjectStorage]
+categories: [스터디, 인프라, Storage, S3, ObjectStorage]
 tags: [S3Security, IAM, SigV4, SSE, KMS, OIDC, STS, PresignedURL]
 published: true
 ---

@@ -2,7 +2,7 @@
 layout: post
 title: "05. RabbitMQ, Kafka, Redis를 함께 쓰는 실제 아키텍처"
 date: 2026-07-05 15:00:00 +0900
-categories: [Architecture, Middleware, PlatformEngineering]
+categories: [스터디, 인프라, Architecture, Middleware, PlatformEngineering]
 tags: [RabbitMQ, Kafka, Redis, Architecture, QnA, EventDrivenArchitecture, MSA]
 published: true
 ---

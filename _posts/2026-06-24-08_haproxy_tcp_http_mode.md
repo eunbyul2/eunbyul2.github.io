@@ -2,7 +2,7 @@
 layout: post
 title: "HAProxy TCP Mode와 HTTP Mode 차이"
 date: 2026-06-24 23:40:00 +0900
-categories: [Network, HAProxy]
+categories: [스터디, 인프라, Network, HAProxy]
 tags: [HAProxy, TCPMode, HTTPMode, SSLPassthrough, TLSTermination, SNI, PROXYProtocol, Kubernetes]
 published: true
 ---

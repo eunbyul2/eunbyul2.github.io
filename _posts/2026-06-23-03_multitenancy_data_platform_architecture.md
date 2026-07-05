@@ -2,7 +2,7 @@
 layout: post
 title: "Multi-Tenancy와 Data Platform Architecture: Data Lake, Warehouse, Lakehouse, Catalog"
 date: 2026-06-23 20:33:00 +0900
-categories: [DataPlatform, Architecture, Kubernetes]
+categories: [스터디, 인프라, DataPlatform, Architecture, Kubernetes]
 tags: [MultiTenancy, Tenant, SharedCluster, DataLake, DataWarehouse, DataLakehouse, ObjectStorage, Metadata, Catalog]
 published: true
 ---

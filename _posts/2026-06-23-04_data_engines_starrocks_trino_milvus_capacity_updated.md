@@ -2,7 +2,7 @@
 layout: post
 title: "Data Engine 비교: StarRocks, Trino, Milvus와 Capacity Management"
 date: 2026-06-23 21:10:00 +0900
-categories: [DataPlatform, Database, Infrastructure]
+categories: [스터디, 인프라, DataPlatform, Database, Infrastructure]
 tags: [StarRocks, Trino, Milvus, MPP, OLAP, VectorDatabase, RAG, DataLake, CapacityPlanning, ThinProvisioning, ResourceGroup, RBAC, MultiTenancy, SharedCluster]
 published: true
 ---

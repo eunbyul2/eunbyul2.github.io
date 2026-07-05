@@ -2,7 +2,7 @@
 layout: post
 title: "Observability와 RCA: Logging, Metrics, Tracing, Monitoring, Alerting으로 장애 원인 분석하기"
 date: 2026-06-25 08:56:00 +0900
-categories: [Observability, Troubleshooting]
+categories: [스터디, 인프라, Observability, Troubleshooting]
 tags: [Observability, RCA, Logging, Metrics, Tracing, Monitoring, Alerting, Prometheus, Grafana, WhaTap, SLI, SLO]
 published: true
 ---
