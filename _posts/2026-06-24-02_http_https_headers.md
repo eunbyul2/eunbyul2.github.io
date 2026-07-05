@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "HTTP/HTTPS와 HTTP Header 완전 "
-date: 2026-06-24 17:00:00 +0900
+date: 2026-06-24 18:57:00 +0900
 categories: [Network, HTTP]
 tags: [HTTP, HTTPS, TLS, SSL, Header, Cookie, Session, JWT, REST, HTTP2, HTTP3, Ingress, Proxy]
 published: true

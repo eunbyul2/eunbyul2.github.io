@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Kubernetes 네트워크 완전 정리: Pod, CNI, kube-proxy, CoreDNS, eBPF, NetworkPolicy"
-date: 2026-06-24 17:00:00 +0900
+date: 2026-06-24 19:30:00 +0900
 categories: [Kubernetes, Network]
 tags: [Kubernetes, Network, CNI, Cilium, kube-proxy, CoreDNS, eBPF, NetworkPolicy, PodNetwork]
 published: true
