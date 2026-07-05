@@ -1,13 +1,18 @@
 ---
 layout: page
-title: AI 인프라 구성 배포 스터디
+title: 인프라 스터디
 icon: fas fa-server
 order: 5
 ---
 
-> 모각코 - "AI 시대에 개발자가 알아야 할 인프라 구성 배포" 스터디 기록
+> 인프라 스터디 기록
 
-{% assign posts = site.categories["인프라"] | sort: 'date' | reverse %}
+{% assign posts = site.categories["인프라"] %}
+{% if posts %}
+  {% assign posts = posts | sort: 'date' | reverse %}
+{% else %}
+  {% assign posts = "" | split: "," %}
+{% endif %}
 <div class="list-group">
 {% for post in posts %}
   <a href="{{ post.url | relative_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

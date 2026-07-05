@@ -1,13 +1,13 @@
 ---
 layout: page
-title: CKA 스터디
-icon: fas fa-dharmachakra
-order: 6
+title: AI 시대에 개발자가 알아야 할 인프라 구성 배포 with 클로드코드
+icon: fas fa-robot
+order: 8
 ---
 
-> CKA(Certified Kubernetes Administrator) 자격증 준비 스터디 기록
+> 모각코 (4주) - AI 시대에 개발자가 알아야 할 인프라 구성 배포 with 클로드코드 스터디 기록
 
-{% assign posts = site.categories["CKA"] %}
+{% assign posts = site.categories["AI인프라모각코"] %}
 {% if posts %}
   {% assign posts = posts | sort: 'date' | reverse %}
 {% else %}

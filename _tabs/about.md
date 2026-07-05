@@ -1,7 +1,7 @@
 ---
 layout: page
 icon: fas fa-info-circle
-order: 8
+order: 9
 ---
 
 # 👩‍💻 은별 | Eunbyul
