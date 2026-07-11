@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Learning eBPF] 00. Chapter 1을 읽기 전에 알아야 하는 Linux와 eBPF 기초"
+title: "[Learning eBPF] Chapter 0. 읽기 전에 알아야 하는 Linux와 eBPF 기초"
 date: 2026-07-11 14:40:00 +0900
 categories: [Study, eBPF, Linux]
 tags: [eBPF, Linux, Kernel, Kubernetes, Cilium, Networking]
