@@ -7,12 +7,8 @@ order: 7
 
 > eBPF 스터디 기록
 
-{% assign posts = site.categories["eBPF"] %}
-{% if posts %}
-  {% assign posts = posts | sort: 'date' | reverse %}
-{% else %}
-  {% assign posts = "" | split: "," %}
-{% endif %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-ebpf/'" %}
+{% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}
   <a href="{{ post.url | relative_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

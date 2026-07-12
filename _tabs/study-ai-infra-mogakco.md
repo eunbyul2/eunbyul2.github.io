@@ -7,12 +7,8 @@ order: 8
 
 > 모각코 (4주) - AI 시대에 개발자가 알아야 할 인프라 구성 배포 with 클로드코드 스터디 기록
 
-{% assign posts = site.categories["AI인프라모각코"] %}
-{% if posts %}
-  {% assign posts = posts | sort: 'date' | reverse %}
-{% else %}
-  {% assign posts = "" | split: "," %}
-{% endif %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-infra_with_cluade/'" %}
+{% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}
   <a href="{{ post.url | relative_url }}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">

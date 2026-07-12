@@ -1,13 +1,13 @@
 ---
 layout: page
-title: CKA 스터디
-icon: fas fa-dharmachakra
-order: 6
+title: 스토리지 스터디
+icon: fas fa-hdd
+order: 11
 ---
 
-> CKA(Certified Kubernetes Administrator) 자격증 준비 스터디 기록
+> 스토리지 스터디 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/cka/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/storage/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

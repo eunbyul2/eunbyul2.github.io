@@ -2,7 +2,7 @@
 layout: post
 title: "Linux 네트워크: NIC, Bridge, Namespace, veth, Routing Table, ip 명령어"
 date: 2026-06-25 07:27:00 +0900
-categories: [스터디, 인프라, Linux, Network]
+categories: [Linux, Network]
 tags: [Linux, Network, NIC, Bridge, Namespace, veth, RoutingTable, iproute2, tcpdump, Kubernetes, CNI]
 published: true
 ---

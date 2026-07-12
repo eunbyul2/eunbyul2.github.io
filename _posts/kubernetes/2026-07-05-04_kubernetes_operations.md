@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "04. Kubernetes에서 RabbitMQ, Kafka, Redis를 배포하고 운영할 때 보는 것"
+title: "Kubernetes에서 RabbitMQ, Kafka, Redis를 배포하고 운영할 때 보는 것"
 date: 2026-07-05 13:30:00 +0900
 categories: [스터디, 인프라, Kubernetes, Middleware, PlatformEngineering]
 tags: [Kubernetes, StatefulSet, PVC, RabbitMQ, Kafka, Redis, HA, Operator, Helm]
