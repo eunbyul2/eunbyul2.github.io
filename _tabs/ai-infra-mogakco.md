@@ -7,7 +7,7 @@ order: 8
 
 > 모각코 (4주) - AI 시대에 개발자가 알아야 할 인프라 구성 배포 with 클로드코드 모각코 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/ai-infra-mogakco/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-infra-with_claude/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}
