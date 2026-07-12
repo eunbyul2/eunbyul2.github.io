@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[AI 인프라 모각코] 3장: 첫 번째 배포 파이프라인"
-date: 2026-07-13 22:50:00 +0900
+date: 2026-07-12 22:50:00 +0900
 categories: [AI, Claude Code, GitOps]
 tags: [Claude Code, GitHub Actions, ArgoCD, GitOps, Kubernetes, GCP, Artifact Registry]
 published: true
