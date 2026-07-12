@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[AI 인프라 모각코] 4장: 관측 가능성 한 번에 구축하기"
-date: 2026-07-13 10:00:00 +0900
+date: 2026-07-12 22:55:00 +0900
 categories: [Kubernetes, Observability]
 tags: [Prometheus, Grafana, Loki, Fluent Bit, Alertmanager]
 published: true
