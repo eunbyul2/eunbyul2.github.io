@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Learning eBPF] Chapter 2: eBPF’s “Hello World”
+title: "[Learning eBPF] Chapter 2: eBPF’s “Hello World”"
 date: 2026-07-18 17:20:00 +0900
 categories: [eBPF, Linux, Kernel]
 tags: [eBPF, BPF, BCC, BPFMap, Kprobe, PerfBuffer, RingBuffer, TailCall]
