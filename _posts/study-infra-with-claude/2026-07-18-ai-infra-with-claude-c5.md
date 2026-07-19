@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 5장: 무장단 배포"
+title: "[AI 인프라 모각코] 5장: 무중단 배포"
 date: 2026-07-18 21:00:00 +0900
 categories: [스터디, AI인프라모각코, Kubernetes, GitOps]
 tags: [Kubernetes, GatewayAPI, ArgoRollouts, BlueGreen, GitOps, ClaudeCode]
