@@ -7,6 +7,10 @@ tags: [eBPF, BPF, BCC, BPFMap, Kprobe, PerfBuffer, RingBuffer, TailCall]
 published: true
 ---
 
+# Learning eBPF Chapter 2
+
+## eBPF’s “Hello World”
+
 Chapter 1에서는 eBPF가 Linux Kernel 내부에서 사용자 정의 로직을 실행하기 위한 Runtime이며, 특정 Kernel Event에 연결되어 Event-driven 방식으로 동작한다는 점을 살펴봤다. Chapter 2에서는 이 개념을 실제 코드와 실행 흐름으로 연결한다. 제목은 `Hello World`지만, 이 장의 핵심은 문자열을 한 번 출력하는 데 있지 않다. eBPF Program이 어떤 과정을 거쳐 Kernel에 Load되고, 특정 Hook에 Attach되며, Event가 발생했을 때 어떻게 실행되고, Kernel에서 수집한 데이터를 User Space로 전달하는지를 처음부터 끝까지 확인하는 것이 목적이다.
 
 이 장의 예제는 단순한 출력에서 시작해 점차 실제 eBPF Application의 구조에 가까워진다. 처음에는 `bpf_trace_printk()`를 이용해 문자열을 출력하고, 그 다음에는 BPF Map을 이용해 Event 사이에서 상태를 유지한다. 이후 Perf Buffer를 이용해 구조화된 Event를 User Space로 전달하고, 마지막에는 Function Call과 Tail Call을 통해 Program을 분리하는 방법을 살펴본다.
