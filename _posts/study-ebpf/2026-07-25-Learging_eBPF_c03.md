@@ -15,8 +15,6 @@ Chapter 2에서는 BCC를 이용해 Python 코드 안에 eBPF C 코드를 작성
 
 Chapter 3에서는 그 뒤에 감춰져 있던 과정을 하나씩 직접 확인한다. 제한된 C로 eBPF 프로그램을 작성하고, Clang과 LLVM을 이용해 eBPF Bytecode가 포함된 ELF Object File을 만든다. 이후 `bpftool`로 프로그램을 Kernel에 Load하고, XDP Hook에 Attach한 뒤 실제 Packet이 들어왔을 때 실행되는 흐름을 확인한다. 마지막에는 Global Variable이 BPF Map으로 구현되는 방식과 Program의 Detach, Unload, BPF-to-BPF Function Call까지 살펴본다.
 
-처음에는 이 챕터가 Bytecode나 Assembly를 다루는 다소 저수준의 내용이라고 생각했는데, 실제로는 **eBPF 프로그램 하나가 작성되어 커널에서 실행되고 사라질 때까지의 전체 생명주기**를 설명하는 장에 더 가까웠다.
-
 ```text
 eBPF C Source
       ↓
@@ -115,6 +113,143 @@ R10 - 24     구조체 일부
 ```
 
 R10은 프로그램이 임의로 변경할 수 없다. Verifier가 Stack 범위를 판단할 때 R10이 고정된 기준점이 되어야 하기 때문이다. 만약 Program이 R10 값을 자유롭게 바꿀 수 있다면 `R10 - 8`이 실제 Stack인지 다른 Kernel Memory인지 구분하기 어려워진다.
+
+이 부분을 읽으면서 한 가지 궁금증이 생겼다. Function이나 Helper를 호출할 때 인자는 R1부터 R5까지 전달한다고 하는데, **인자가 5개보다 많으면 어떻게 되는지**가 궁금했다.
+
+### 인자가 5개를 넘으면 어떻게 될까
+
+일반적인 x86-64 C Calling Convention에서는 Register에 담을 수 있는 수보다 인자가 많으면 나머지 인자를 Stack으로 넘길 수 있다. 그래서 처음에는 eBPF도 R1부터 R5까지는 Register에 넣고, 여섯 번째 인자부터는 Stack에 저장할 것이라고 생각했다.
+
+하지만 eBPF의 기본 Calling Convention은 그렇게 동작하지 않는다. eBPF에서는 Function Call Argument로 사용할 수 있는 Register가 R1부터 R5까지로 고정되어 있으며, 전통적인 eBPF Function과 BPF Helper 호출은 **최대 다섯 개의 인자만 직접 받을 수 있다**.
+
+```text
+R1 = argument 1
+R2 = argument 2
+R3 = argument 3
+R4 = argument 4
+R5 = argument 5
+
+R6 = 여섯 번째 인자 용도가 아님
+R7 = 일곱 번째 인자 용도가 아님
+```
+
+R6부터 R9는 추가 인자를 전달하는 Register가 아니라, Function Call 이후에도 값이 보존되어야 하는 Callee-Saved Register다. 따라서 여섯 번째 인자가 있다고 해서 자동으로 R6에 들어가는 것은 아니다. R10 역시 Stack Argument를 전달하는 용도가 아니라 현재 Stack Frame을 가리키는 Read-only Frame Pointer다.
+
+예를 들어 다음처럼 인자가 여섯 개인 Function을 그대로 만들려고 하면 eBPF Calling Convention과 맞지 않는다.
+
+```c
+static __noinline int calculate(
+    int a,
+    int b,
+    int c,
+    int d,
+    int e,
+    int f)
+{
+    return a + b + c + d + e + f;
+}
+```
+
+일반적인 eBPF 환경에서는 이 여섯 값을 각각 R1부터 R6에 배치하는 방식으로 호출할 수 없다. R6은 Argument Register가 아니기 때문이다. 이 경우에는 여러 값을 하나의 구조체로 묶고, 그 구조체를 가리키는 Pointer 하나를 Argument로 전달하는 방식이 가장 일반적이다.
+
+```c
+struct calculate_args {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+};
+
+static __noinline int calculate(struct calculate_args *args)
+{
+    return args->a + args->b + args->c
+         + args->d + args->e + args->f;
+}
+```
+
+호출하는 쪽에서는 구조체를 Stack에 만들고 Pointer 하나만 R1로 전달할 수 있다.
+
+```c
+struct calculate_args args = {
+    .a = 1,
+    .b = 2,
+    .c = 3,
+    .d = 4,
+    .e = 5,
+    .f = 6,
+};
+
+int result = calculate(&args);
+```
+
+Register 관점에서 보면 다음과 같다.
+
+```text
+R1 = &args
+      ↓
+calculate()가 Pointer를 통해
+a, b, c, d, e, f를 읽음
+```
+
+즉, Argument 개수는 하나지만 그 Pointer가 가리키는 Memory 안에 여러 값을 함께 담는 것이다. 이 방법은 BPF Helper나 BPF-to-BPF Function에서 여러 정보를 한 번에 넘겨야 할 때 자주 사용된다.
+
+다만 구조체를 Stack에 배치할 경우 eBPF Stack 크기 제한도 고려해야 한다. 너무 큰 구조체를 Local Variable로 만들면 Verifier가 Stack 사용량 초과로 Program Load를 거부할 수 있다. 데이터가 크거나 여러 Function에서 공유해야 한다면 BPF Map, Per-CPU Map, Global Data 영역 등을 이용해 값을 저장하고 Pointer 또는 Key만 전달하는 방식도 사용할 수 있다.
+
+```text
+작은 데이터 묶음
+→ Stack에 struct 생성 후 Pointer 전달
+
+큰 데이터 또는 실행 간 공유 상태
+→ BPF Map에 저장 후 Map Value Pointer 사용
+
+고정된 설정값
+→ Global Data 또는 .rodata 사용
+```
+
+또 다른 방법은 Function을 여러 단계로 나누는 것이다.
+
+```c
+static __noinline int step_one(int a, int b, int c)
+{
+    return a + b + c;
+}
+
+static __noinline int step_two(int partial, int d, int e, int f)
+{
+    return partial + d + e + f;
+}
+```
+
+하지만 단순히 인자 수 제한을 피하려고 Function Call을 지나치게 늘리면 Call Depth와 Stack Frame 사용량이 증가할 수 있다. 따라서 관련 값들을 의미 있는 구조체로 묶어 Pointer로 전달하는 방식이 보통 더 자연스럽다.
+
+BPF Helper도 같은 Calling Convention을 따르기 때문에 Prototype 자체가 최대 다섯 개의 인자로 정의된다.
+
+```c
+long bpf_helper(
+    void *arg1,
+    __u64 arg2,
+    __u64 arg3,
+    __u64 arg4,
+    __u64 arg5);
+```
+
+여러 값을 요구하는 Helper는 개별 값을 계속 추가하기보다, 구조체 Pointer나 Context Pointer를 하나의 인자로 받도록 Interface가 설계되는 경우가 많다.
+
+정리하면, 전통적인 eBPF Calling Convention에서는 여섯 번째 인자를 자동으로 Stack에 넘기는 규칙이 없다. 다섯 개가 넘는 값을 전달해야 한다면 보통 구조체로 묶어서 Pointer 하나를 넘기거나, Map이나 Global Data에 저장한 뒤 필요한 Reference만 전달한다.
+
+```text
+인자 5개 이하
+→ R1~R5에 직접 전달
+
+전달할 값이 5개 초과
+→ struct로 묶고 Pointer 전달
+→ Map 또는 Global Data 사용
+→ 필요한 경우 Function을 의미 있게 분리
+```
+
+이 부분을 확인하면서 eBPF에서 Pointer와 구조체를 자주 사용하는 이유도 조금 더 이해할 수 있었다. 단순히 C 문법상의 선택이 아니라, 다섯 개의 Argument Register만 제공하는 eBPF Calling Convention과 제한된 Stack 안에서 여러 데이터를 안전하게 전달하기 위한 방식이었다.
 
 이 부분을 읽으면서 eBPF Program이 단순히 “커널에서 실행되는 C 코드”가 아니라, 명확한 Register 규칙과 Calling Convention을 가진 별도의 실행 모델 위에서 동작한다는 점이 확실해졌다.
 
