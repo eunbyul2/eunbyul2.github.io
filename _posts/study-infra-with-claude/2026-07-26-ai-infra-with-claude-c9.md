@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[인프라 구성·배포 with Claude 모각코] Chapter 9. GitAIOps, 살아있는 운영 표준의 탄생"
+title: "[인프라 구성·배포 with Claude 모각코] 9장. GitAIOps, 살아있는 운영 표준의 탄생"
 date: 2026-07-26 14:00:00 +0900
 categories: [CloudNet, Kubernetes, GitOps]
 tags: [Kubernetes, GitOps, Claude Code, AI, GitAIOps]
