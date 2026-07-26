@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 6장: 엔터프라이즈를 위한 기반 정비"
+title: "[인프라 구성·배포 with Claude 모각코] 6장: 엔터프라이즈를 위한 기반 정비"
 date: 2026-07-19 23:00:00 +0900
 categories: [스터디, AI인프라모각코, Kubernetes, GitOps]
 tags: [GitOps, Kubernetes, ArgoCD, Valkey, Redis, StatefulSet, ClaudeCode, GKE]
 published: true
 ---
 
-## 6장. 엔터프라이즈 환경으로 한 단계 더
+# Chapter 6. 엔터프라이즈를 위한 기반 정비
 
 5장에서는 Gateway API와 Argo Rollouts를 이용해 Blue/Green 배포까지 구성했다.
 

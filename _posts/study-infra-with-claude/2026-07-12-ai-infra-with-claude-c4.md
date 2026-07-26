@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 4장: 관측 가능성 한 번에 구축하기"
+title: "[인프라 구성·배포 with Claude 모각코] 4장: 관측 가능성 한 번에 구축하기"
 date: 2026-07-12 22:55:00 +0900
 categories: [Kubernetes, Observability]
 tags: [Prometheus, Grafana, Loki, Fluent Bit, Alertmanager]
 published: true
 ---
 
-# Chapter 4. Observability 환경 구축하기
+# Chapter 4. 관측 가능성 한 번에 구축하기
 
 3장에서는 GitOps 기반으로 Kubernetes 애플리케이션을 배포하는 환경을 만들었다.
 

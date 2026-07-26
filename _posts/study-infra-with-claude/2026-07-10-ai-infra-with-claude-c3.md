@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 3장: 첫 번째 배포 파이프라인"
+title: "[인프라 구성·배포 with Claude 모각코] 3장: 첫 번째 배포 파이프라인"
 date: 2026-07-10 20:50:00 +0900
 categories: [AI, Claude Code, GitOps]
 tags: [Claude Code, GitHub Actions, ArgoCD, GitOps, Kubernetes, GCP, Artifact Registry]
 published: true
 ---
 
-# Claude Code로 GitHub Actions와 ArgoCD GitOps 파이프라인 구축해보기
+# Chapter3. 첫 번째 배포 파이프라인
 
 최근 Claude Code를 사용해서 GitHub Actions와 ArgoCD를 연결한 GitOps 파이프라인을 직접 구축해보았다.
 

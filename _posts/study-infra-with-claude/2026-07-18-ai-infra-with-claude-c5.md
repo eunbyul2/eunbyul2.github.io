@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 5장: 무중단 배포"
+title: "[인프라 구성·배포 with Claude 모각코] 5장: 무중단 배포"
 date: 2026-07-18 21:00:00 +0900
 categories: [스터디, AI인프라모각코, Kubernetes, GitOps]
 tags: [Kubernetes, GatewayAPI, ArgoRollouts, BlueGreen, GitOps, ClaudeCode]
 published: true
 ---
 
-# Gateway API와 Argo Rollouts로 무중단 배포 구현하기
+# Chapter 5. 무중단 배포
 
 지난 장에서는 Claude Code를 활용하여 애플리케이션을 배포하고 GitOps 환경을 구성했다. 애플리케이션을 정상적으로 배포하는 것까지는 성공했지만, 운영 환경에서는 단순히 배포가 되는 것만으로는 부족하다.
 

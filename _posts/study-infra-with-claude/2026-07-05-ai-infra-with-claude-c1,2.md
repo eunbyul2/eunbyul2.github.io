@@ -1,13 +1,13 @@
 ---
 layout: post
-title: "[AI 인프라 모각코] 2장: Claude Code로 GKE 클러스터 구축하고 첫 배포하기"
+title: "[인프라 구성·배포 with Claude 모각코] 2장: Claude Code로 GKE 클러스터 구축하고 첫 배포하기"
 date: 2026-07-05 22:45:00 +0900
 categories: [스터디, AI인프라모각코, Kubernetes, GCP]
 tags: [ClaudeCode, GKE, Kubernetes, Docker, GCP, Go, DevOps]
 published: true
 ---
 
-# AI 시대에 개발자가 알아야 하는 인프라 구성 · 배포 with Claude Code
+# Cpater 1, 2
 
 ![ai_infra_with_claude교재](../img/ai_infra_with_claude.jpg)
 
