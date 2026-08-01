@@ -1,11 +1,11 @@
 ---
 layout: page
-title: CKA 스터디
+title: CKA 공부
 icon: fas fa-dharmachakra
 order: 6
 ---
 
-> CKA(Certified Kubernetes Administrator) 자격증 준비 스터디 기록
+> CKA(Certified Kubernetes Administrator) 자격증 준비 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/cka/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}

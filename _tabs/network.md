@@ -1,13 +1,13 @@
 ---
 layout: page
-title: GPU 인프라 스터디
-icon: fas fa-microchip
-order: 14
+title: 네트워크 공부
+icon: fas fa-globe
+order: 10
 ---
 
-> GPU 인프라 스터디 기록
+> 네트워크 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/gpu/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/networking/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

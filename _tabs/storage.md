@@ -1,11 +1,11 @@
 ---
 layout: page
-title: 스토리지 스터디
+title: 스토리지 공부
 icon: fas fa-hdd
 order: 11
 ---
 
-> 스토리지 스터디 기록
+> 스토리지 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/storage/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}

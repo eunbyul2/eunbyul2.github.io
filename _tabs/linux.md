@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Linux 스터디
+title: Linux 공부
 icon: fab fa-linux
 order: 16
 ---
 
-> Linux 스터디 기록
+> Linux 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/linux/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}

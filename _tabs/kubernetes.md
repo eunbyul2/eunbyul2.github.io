@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Kubernetes 스터디
+title: Kubernetes 공부
 icon: fas fa-cubes
 order: 5
 ---
 
-> Kubernetes 스터디 기록
+> Kubernetes 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/kubernetes/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
