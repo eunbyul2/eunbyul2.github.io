@@ -5,6 +5,7 @@ date: 2026-08-01 19:00:00 +0900
 categories: [eBPF, Linux, Kernel]
 tags: [eBPF, BPF, Linux Kernel, BTF, BPF Map, Perf Buffer, Ring Buffer, bpftool]
 published: true
+mermaid: true
 ---
 
 # Learning eBPF Chapter 4
