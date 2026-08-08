@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[eBPF Open Source] Pixie의 Stirling Socket Tracer 분석"
-date: 2026-08-08 19:25:00 +0900
+date: 2026-08-08 19:20:00 +0900
 categories: [eBPF, Pixie, Observability]
 tags: [eBPF, Pixie, Stirling, BCC, kprobe, BPF Map, Perf Buffer, Kubernetes]
 published: true
