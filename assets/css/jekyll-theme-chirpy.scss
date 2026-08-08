@@ -129,22 +129,26 @@ a.post-tag:hover {
    ring killed outright. */
 .post-tag.btn-outline-primary:hover,
 .post-tag.btn-outline-primary:focus,
-.post-tag.btn-outline-primary:focus-visible {
+.post-tag.btn-outline-primary:focus-visible,
+.post-tag.btn-outline-primary:active {
   background-color: rgba(245, 158, 11, 0.18) !important;
   border-color: #d97706 !important;
   color: var(--text-color) !important;
   box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Older/Newer post-nav buttons are also Bootstrap btn-outline-primary --
-   same treatment, so hovering them isn't blue either. */
+   same treatment, so hovering/clicking them isn't blue either. */
 .post-navigation .btn-outline-primary:hover,
 .post-navigation .btn-outline-primary:focus,
-.post-navigation .btn-outline-primary:focus-visible {
+.post-navigation .btn-outline-primary:focus-visible,
+.post-navigation .btn-outline-primary:active {
   background-color: rgba(245, 158, 11, 0.18) !important;
   border-color: #d97706 !important;
   color: var(--text-color) !important;
   box-shadow: none !important;
+  outline: none !important;
 }
 
 /* ----- "Further Reading" (related posts) -- secondary, after post-nav -----
