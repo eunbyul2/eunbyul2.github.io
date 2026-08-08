@@ -101,3 +101,19 @@
 #sidebar ul li.nav-item.active .nav-link span {
   opacity: 1;
 }
+
+/* ----- Trending Tags panel (right side) -----
+   Replace Bootstrap's default btn-outline-primary blue with the same accent
+   color used for the selected sidebar menu tab above, so both "selected"
+   states in the UI use one consistent color. */
+.post-tag.btn-outline-primary {
+  border-color: var(--sidebar-active-color);
+  color: var(--sidebar-active-color);
+}
+
+.post-tag.btn-outline-primary:hover,
+.post-tag.btn-outline-primary:focus {
+  background-color: var(--sidebar-active-color) !important;
+  border-color: var(--sidebar-active-color) !important;
+  color: #fff !important;
+}

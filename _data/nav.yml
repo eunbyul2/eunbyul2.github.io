@@ -37,8 +37,10 @@
 
 - title: Kubernetes
   icon: fas fa-cubes
-  url: /k8s/
   children:
+    - title: Kubernetes
+      icon: fas fa-cubes
+      url: /k8s/
     - title: Cilium
       icon: fas fa-diagram-project
       url: /cilium/
@@ -49,8 +51,10 @@
 
 - title: 스토리지
   icon: fas fa-hdd
-  url: /storage/
   children:
+    - title: 스토리지
+      icon: fas fa-hdd
+      url: /storage/
     - title: Ceph
       icon: fas fa-circle-nodes
       url: /ceph/
