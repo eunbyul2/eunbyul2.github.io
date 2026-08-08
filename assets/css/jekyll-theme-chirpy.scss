@@ -121,24 +121,58 @@ a.post-tag:hover {
   color: var(--text-color) !important;
 }
 
+/* The Trending Tags panel's <a> ALSO carries Bootstrap's own btn/
+   btn-outline-primary classes, which fight the rule above with their own
+   hover background/border AND a blue focus ring (box-shadow) -- so it needs
+   a more specific, more forceful override: a darker/more saturated orange
+   border (as asked for), not the pale tint used elsewhere, and the focus
+   ring killed outright. */
+.post-tag.btn-outline-primary:hover,
+.post-tag.btn-outline-primary:focus,
+.post-tag.btn-outline-primary:focus-visible {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  border-color: #d97706 !important;
+  color: var(--text-color) !important;
+  box-shadow: none !important;
+}
+
+/* Older/Newer post-nav buttons are also Bootstrap btn-outline-primary --
+   same treatment, so hovering them isn't blue either. */
+.post-navigation .btn-outline-primary:hover,
+.post-navigation .btn-outline-primary:focus,
+.post-navigation .btn-outline-primary:focus-visible {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  border-color: #d97706 !important;
+  color: var(--text-color) !important;
+  box-shadow: none !important;
+}
+
 /* ----- "Further Reading" (related posts) -- secondary, after post-nav -----
    _layouts/post.html now renders post-nav (same-folder prev/next) before
-   related-posts (site-wide, tag-based). Shrink related-posts so it visually
-   reads as a smaller, secondary suggestion under the primary prev/next. */
+   related-posts (site-wide, tag-based). Shrink related-posts further so it
+   visually reads as a small, secondary suggestion under the primary prev/next. */
 #related-posts #related-label {
-  font-size: 1rem;
+  font-size: 0.9rem;
   opacity: 0.7;
-  margin-bottom: 1rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#related-posts nav.row {
+  --bs-gutter-x: 0.75rem;
+  --bs-gutter-y: 0.75rem;
+  margin-bottom: 0.75rem !important;
 }
 
 #related-posts .post-preview .card-body {
-  padding: 0.75rem;
+  padding: 0.5rem;
 }
 
 #related-posts .post-preview h4 {
-  font-size: 0.95rem;
+  font-size: 0.8rem;
+  margin: 0.25rem 0 !important;
 }
 
 #related-posts .post-preview .text-muted p {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
+  margin-bottom: 0;
 }
