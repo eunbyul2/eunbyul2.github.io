@@ -123,14 +123,16 @@ a.post-tag:hover {
 
 /* The Trending Tags panel's <a> ALSO carries Bootstrap's own btn/
    btn-outline-primary classes, which fight the rule above with their own
-   hover background/border AND a blue focus ring (box-shadow) -- so it needs
-   a more specific, more forceful override: a darker/more saturated orange
-   border (as asked for), not the pale tint used elsewhere, and the focus
-   ring killed outright. */
-.post-tag.btn-outline-primary:hover,
-.post-tag.btn-outline-primary:focus,
-.post-tag.btn-outline-primary:focus-visible,
-.post-tag.btn-outline-primary:active {
+   hover background/border AND a blue focus ring (box-shadow). Found via
+   devtools: the theme itself has `.btn.btn-outline-primary:not(.disabled):hover
+   { border-color: #007bff !important; }` in _base.scss -- also !important,
+   and MORE specific than the rule below was, so it kept winning. Matching
+   `.btn` + `:not(.disabled)` here brings this rule's specificity above that
+   one, so ours finally wins. */
+.post-tag.btn.btn-outline-primary:not(.disabled):hover,
+.post-tag.btn.btn-outline-primary:not(.disabled):focus,
+.post-tag.btn.btn-outline-primary:not(.disabled):focus-visible,
+.post-tag.btn.btn-outline-primary:not(.disabled):active {
   background-color: rgba(245, 158, 11, 0.18) !important;
   border-color: #d97706 !important;
   color: var(--text-color) !important;
@@ -139,11 +141,11 @@ a.post-tag:hover {
 }
 
 /* Older/Newer post-nav buttons are also Bootstrap btn-outline-primary --
-   same treatment, so hovering/clicking them isn't blue either. */
-.post-navigation .btn-outline-primary:hover,
-.post-navigation .btn-outline-primary:focus,
-.post-navigation .btn-outline-primary:focus-visible,
-.post-navigation .btn-outline-primary:active {
+   same specificity fix as above, so hovering/clicking them isn't blue either. */
+.post-navigation .btn.btn-outline-primary:not(.disabled):hover,
+.post-navigation .btn.btn-outline-primary:not(.disabled):focus,
+.post-navigation .btn.btn-outline-primary:not(.disabled):focus-visible,
+.post-navigation .btn.btn-outline-primary:not(.disabled):active {
   background-color: rgba(245, 158, 11, 0.18) !important;
   border-color: #d97706 !important;
   color: var(--text-color) !important;

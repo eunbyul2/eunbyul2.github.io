@@ -15,8 +15,17 @@
   {%- for item in include.items -%}
     {%- assign item_id = include.parent | append: '-' | append: forloop.index -%}
     {%- assign is_active = false -%}
-    {%- if item.url and item.url == page.url -%}
-      {%- assign is_active = true -%}
+    {%- if item.url -%}
+      {%- if item.url == page.url -%}
+        {%- assign is_active = true -%}
+      {%- elsif page.path -%}
+        {%- comment -%} Also active for any post inside this item's _posts/<folder>/, so opening a post keeps its tab highlighted instead of only the tab's own index page. {%- endcomment -%}
+        {%- assign item_folder = item.url | remove: '/' -%}
+        {%- assign folder_prefix = '_posts/' | append: item_folder | append: '/' -%}
+        {%- if page.path contains folder_prefix -%}
+          {%- assign is_active = true -%}
+        {%- endif -%}
+      {%- endif -%}
     {%- endif -%}
     <li class="nav-item{% if item.children %} has-children open{% endif %}{% if is_active %} active{% endif %}">
       {%- if item.children -%}
