@@ -30,17 +30,18 @@
 }
 
 /* ----- Nested topic tree (always expanded, data-driven by _data/nav.yml) -----
-   Rendered as a visibly-contained panel (tinted background + accent rail) so a
-   group and its children read as one unit at a glance. Narrower side padding
-   than the default (which is meant for un-nested items) reclaims width so
-   titles are less likely to wrap. */
+   Rendered as a visibly-contained panel (tinted background, no border rail)
+   so a group and its children read as one unit at a glance. Uses a neutral
+   tint independent of --sidebar-hover-bg, so it never coincides with the
+   hover/active colors below. Narrower side padding than the default (which
+   is meant for un-nested items) reclaims width so titles are less likely to
+   wrap. */
 #sidebar .nav-sub {
   display: none;
   margin: 0.15rem 0 0.35rem 0.85rem !important;
   padding: 0.3rem 0.4rem !important;
-  background-color: var(--sidebar-hover-bg);
-  border-left: 2px solid var(--sidebar-border-color);
-  border-radius: 0 0.6rem 0.6rem 0.6rem;
+  background-color: rgba(127, 127, 127, 0.08);
+  border-radius: 0.6rem;
 }
 
 #sidebar .nav-item.open > .nav-sub {
@@ -84,13 +85,13 @@
 }
 
 /* ----- "currently viewing this page" marker -----
-   The theme's default active state fills the same tinted background used
-   above for group boxes, which reads as if the active leaf were a stray
-   group/child. Replace the fill with bold + accent-colored text only, so
-   "this is the current page" never looks like "this is a container". */
+   A solid accent-colored fill + white text -- deliberately a strong, saturated
+   color (not the neutral gray used by hover/group boxes above) so it can't be
+   mistaken for either of those. Wins over :hover too, so mousing over the
+   active item doesn't swap it back to the gray hover tint. */
 #sidebar ul li.nav-item.active .nav-link {
-  background-color: transparent;
-  color: var(--sidebar-active-color);
+  background-color: var(--sidebar-active-color) !important;
+  color: #fff !important;
   font-weight: 700;
 }
 
