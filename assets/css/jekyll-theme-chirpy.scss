@@ -102,18 +102,43 @@
   opacity: 1;
 }
 
-/* ----- Trending Tags panel (right side) -----
-   Replace Bootstrap's default btn-outline-primary blue with the same accent
-   color used for the selected sidebar menu tab above, so both "selected"
-   states in the UI use one consistent color. */
+/* ----- Tag pills everywhere (Trending Tags panel + post-footer tags) -----
+   Both locations render an <a class="post-tag ..."> link, each themed by the
+   theme's own separate mechanism (Bootstrap's btn-outline-primary blue for
+   the panel, --tag-hover/--link-color for the post footer). Override both to
+   the SAME amber tint used for sidebar menu-item hover above, so hovering a
+   tag anywhere looks the same as hovering a sidebar item -- not the theme's
+   blue. !important is needed because the post-footer path applies via
+   :hover, which otherwise wins on specificity. */
 .post-tag.btn-outline-primary {
-  border-color: var(--sidebar-active-color);
-  color: var(--sidebar-active-color);
+  border-color: var(--sidebar-border-color);
+  color: var(--text-color);
 }
 
-.post-tag.btn-outline-primary:hover,
-.post-tag.btn-outline-primary:focus {
-  background-color: var(--sidebar-active-color) !important;
-  border-color: var(--sidebar-active-color) !important;
-  color: #fff !important;
+a.post-tag:hover {
+  background-color: rgba(245, 158, 11, 0.18) !important;
+  border-color: rgba(245, 158, 11, 0.18) !important;
+  color: var(--text-color) !important;
+}
+
+/* ----- "Further Reading" (related posts) -- secondary, after post-nav -----
+   _layouts/post.html now renders post-nav (same-folder prev/next) before
+   related-posts (site-wide, tag-based). Shrink related-posts so it visually
+   reads as a smaller, secondary suggestion under the primary prev/next. */
+#related-posts #related-label {
+  font-size: 1rem;
+  opacity: 0.7;
+  margin-bottom: 1rem !important;
+}
+
+#related-posts .post-preview .card-body {
+  padding: 0.75rem;
+}
+
+#related-posts .post-preview h4 {
+  font-size: 0.95rem;
+}
+
+#related-posts .post-preview .text-muted p {
+  font-size: 0.8rem;
 }
