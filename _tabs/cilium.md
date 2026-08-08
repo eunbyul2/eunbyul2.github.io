@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크 공부
-icon: fas fa-globe
-order: 10
+title: Cilium 공부
+icon: fas fa-diagram-project
+order: 22
 ---
 
-> 네트워크 공부 기록
+> Cilium 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/cilium/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

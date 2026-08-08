@@ -1,11 +1,11 @@
 ---
 layout: page
-title: Ceph 스터디
+title: Ceph 공부
 icon: fas fa-circle-nodes
 order: 15
 ---
 
-> Ceph 스터디 기록
+> Ceph 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/ceph/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}

@@ -1,13 +1,13 @@
 ---
 layout: page
-title: eBPF 스터디
-icon: fas fa-network-wired
-order: 7
+title: LLM Serving & Optimization 스터디
+icon: fas fa-microchip
+order: 13
 ---
 
-> eBPF 스터디 기록
+> LLM Serving & Optimization 스터디 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-ebpf/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-LLM_Serving_and_Optimization/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

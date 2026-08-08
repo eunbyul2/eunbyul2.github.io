@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크 공부
-icon: fas fa-globe
-order: 10
+title: OpenStack 공부
+icon: fas fa-cloud
+order: 18
 ---
 
-> 네트워크 공부 기록
+> OpenStack 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/openstack/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

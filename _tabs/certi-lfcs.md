@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크 공부
-icon: fas fa-globe
-order: 10
+title: LFCS 자격증 스터디
+icon: fas fa-certificate
+order: 20
 ---
 
-> 네트워크 공부 기록
+> LFCS(Linux Foundation Certified System Administrator) 자격증 스터디 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/certi-lfcs/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

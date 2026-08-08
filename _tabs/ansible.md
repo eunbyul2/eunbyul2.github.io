@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크 공부
-icon: fas fa-globe
-order: 10
+title: Ansible 공부
+icon: fas fa-terminal
+order: 19
 ---
 
-> 네트워크 공부 기록
+> Ansible 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/ansible/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

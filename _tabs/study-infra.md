@@ -1,13 +1,13 @@
 ---
 layout: page
-title: Kubernetes 공부
-icon: fas fa-cubes
-order: 5
+title: 인프라 스터디
+icon: fas fa-server
+order: 12
 ---
 
-> Kubernetes 공부 기록
+> 인프라 스터디 관련 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/kubernetes/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-infra/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

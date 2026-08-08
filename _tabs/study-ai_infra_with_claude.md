@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크 공부
-icon: fas fa-globe
-order: 10
+title: 인프라 with 클로드 모각코
+icon: fas fa-robot
+order: 8
 ---
 
-> 네트워크 공부 기록
+> 모각코 (4주) - AI 시대에 개발자가 알아야 할 인프라 구성 배포 with 클로드코드 모각코 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/study-ai_infra_with_claude/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

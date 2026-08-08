@@ -1,0 +1,75 @@
+# Sidebar navigation tree.
+# Each item: { title, icon, url } for a leaf, or { title, icon, children: [...] } for a group.
+# This is purely presentational -- regrouping items here never requires moving/renaming
+# anything under _posts or _tabs. `url` should match an existing _tabs/*.md page's url.
+
+- title: 스터디
+  icon: fas fa-graduation-cap
+  children:
+    - title: 인프라 스터디
+      icon: fas fa-diagram-project
+      url: /study-infra/
+    - title: Learning eBPF 스터디
+      icon: fas fa-network-wired
+      url: /study-Learning_ebpf/
+    - title: 인프라 with 클로드 모각코
+      icon: fas fa-robot
+      url: /study-ai_infra_with_claude/
+    - title: LLM Serving & Optimization 스터디
+      icon: fas fa-microchip
+      url: /study-LLM_Serving_and_Optimization/
+    - title: 정보보안기사 스터디
+      icon: fas fa-shield-halved
+      url: /study-security_certification/
+
+- title: CKA 자격증 스터디
+  icon: fas fa-dharmachakra
+  url: /certi-cka/
+
+- title: KCNA 자격증 스터디
+  icon: fas fa-certificate
+  url: /certi-kcna/
+
+- title: LFCS 자격증 스터디
+  icon: fas fa-certificate
+  url: /certi-lfcs/
+
+- title: Kubernetes 공부
+  icon: fas fa-cubes
+  url: /k8s/
+
+- title: 네트워크 공부
+  icon: fas fa-globe
+  url: /network/
+
+- title: 스토리지 공부
+  icon: fas fa-hdd
+  url: /storage/
+
+- title: Ceph 공부
+  icon: fas fa-circle-nodes
+  url: /ceph/
+
+- title: Ansible 공부
+  icon: fas fa-terminal
+  url: /ansible/
+
+- title: Cilium 공부
+  icon: fas fa-diagram-project
+  url: /cilium/
+
+- title: Terraform 공부
+  icon: fas fa-layer-group
+  url: /terraform/
+
+- title: OpenStack 공부
+  icon: fas fa-cloud
+  url: /openstack/
+
+- title: Linux 공부
+  icon: fab fa-linux
+  url: /linux/
+
+- title: 회사 업무 노트
+  icon: fas fa-building
+  url: /company/

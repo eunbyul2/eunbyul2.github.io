@@ -1,0 +1,11 @@
+{%- comment -%}
+  Outputs the string "yes" if any item in include.items (recursively, any depth)
+  has a url matching the current page. Used by nav-tree.html to auto-expand
+  a group when one of its descendants is the active page.
+{%- endcomment -%}
+{%- for item in include.items -%}
+  {%- if item.url and item.url == page.url -%}yes{%- endif -%}
+  {%- if item.children -%}
+    {% include nav-active.html items=item.children %}
+  {%- endif -%}
+{%- endfor -%}
