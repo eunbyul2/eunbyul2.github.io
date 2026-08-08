@@ -29,6 +29,13 @@
   margin-top: 0;
 }
 
+/* Hover: a fixed amber tint -- an unrelated hue from both the neutral gray
+   group boxes above and the accent-colored fill used by the active marker
+   below, so all three states are unmistakably different colors. */
+#sidebar ul li.nav-item a.nav-link:hover {
+  background-color: rgba(245, 158, 11, 0.18);
+}
+
 /* ----- Nested topic tree (always expanded, data-driven by _data/nav.yml) -----
    Rendered as a visibly-contained panel (tinted background, no border rail)
    so a group and its children read as one unit at a glance. Uses a neutral
@@ -61,10 +68,6 @@
 #sidebar .nav-sub .nav-link span {
   font-size: 74% !important;
   white-space: normal;
-}
-
-#sidebar .has-children > .nav-link span {
-  font-weight: 700;
 }
 
 #sidebar .nav-toggle {
