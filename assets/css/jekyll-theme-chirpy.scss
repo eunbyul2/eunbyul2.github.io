@@ -29,38 +29,56 @@
   margin-top: 0;
 }
 
-/* ----- Nested topic tree (always expanded, data-driven by _data/nav.yml) ----- */
+/* ----- Nested topic tree (always expanded, data-driven by _data/nav.yml) -----
+   Rendered as a visibly-contained panel (tinted background + accent rail) so a
+   group and its children read as one unit at a glance. Narrower side padding
+   than the default (which is meant for un-nested items) reclaims width so
+   titles are less likely to wrap. */
 #sidebar .nav-sub {
   display: none;
-  margin-bottom: 0;
-  padding-left: 0.9rem;
-  margin-left: 0.6rem;
-  border-left: 1px solid var(--sidebar-border-color);
+  margin: 0.15rem 0 0.35rem 0.85rem !important;
+  padding: 0.3rem 0.4rem !important;
+  background-color: var(--sidebar-hover-bg);
+  border-left: 3px solid var(--sidebar-active-color);
+  border-radius: 0 0.6rem 0.6rem 0.6rem;
 }
 
 #sidebar .nav-item.open > .nav-sub {
   display: block;
 }
 
-#sidebar .has-children > .nav-toggle span {
+#sidebar .nav-sub li.nav-item {
+  padding-left: 0.3rem !important;
+  padding-right: 0.5rem !important;
+}
+
+#sidebar .nav-sub .nav-link {
+  padding-top: 0.15rem !important;
+  padding-bottom: 0.15rem !important;
+}
+
+#sidebar .nav-sub .nav-link span {
+  font-size: 74% !important;
+  white-space: normal;
+}
+
+#sidebar .has-children > .nav-link span {
   font-weight: 700;
 }
 
 #sidebar .nav-toggle {
   cursor: pointer;
+  padding: 0.25rem;
+  margin: -0.25rem -0.25rem -0.25rem 0;
 }
 
-#sidebar .nav-toggle .nav-caret {
+#sidebar .nav-caret {
   margin-left: auto;
   font-size: 60%;
   opacity: 0.6;
   transition: transform 0.2s ease;
 }
 
-#sidebar .nav-item.open > .nav-toggle .nav-caret {
+#sidebar .nav-item.open > .nav-link .nav-caret {
   transform: rotate(90deg);
-}
-
-#sidebar .nav-sub .nav-link span {
-  font-size: 76%;
 }

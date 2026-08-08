@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Cilium 공부
+title: Cilium
 icon: fas fa-diagram-project
 order: 22
 ---

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Linux 공부
+title: Linux
 icon: fab fa-linux
 order: 16
 ---

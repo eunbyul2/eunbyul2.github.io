@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Terraform 공부
+title: Terraform
 icon: fas fa-layer-group
 order: 23
 ---

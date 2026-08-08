@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Ansible 공부
+title: Ansible
 icon: fas fa-terminal
 order: 19
 ---

@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Kubernetes 공부
+title: Kubernetes
 icon: fas fa-cubes
 order: 5
 ---

@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 회사 업무 노트
-icon: fas fa-building
-order: 17
+title: MLOps
+icon: fas fa-infinity
+order: 25
 ---
 
-> 회사 업무하다가 모르는 것들을 정리한 기록
+> MLOps 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/company/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/mlops/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

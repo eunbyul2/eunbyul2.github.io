@@ -1,6 +1,6 @@
 ---
 layout: page
-title: 스토리지 공부
+title: 스토리지
 icon: fas fa-hdd
 order: 11
 ---

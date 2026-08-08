@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Ceph 공부
+title: Ceph
 icon: fas fa-circle-nodes
 order: 15
 ---

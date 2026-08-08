@@ -1,6 +1,6 @@
 ---
 layout: page
-title: OpenStack 공부
+title: OpenStack
 icon: fas fa-cloud
 order: 18
 ---

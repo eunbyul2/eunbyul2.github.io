@@ -1,13 +1,13 @@
 ---
 layout: page
-title: 네트워크
-icon: fas fa-globe
-order: 10
+title: Observability
+icon: fas fa-magnifying-glass-chart
+order: 24
 ---
 
-> 네트워크 공부 기록
+> Observability(로깅, 메트릭, 트레이싱, 모니터링, 알림) 공부 기록
 
-{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/network/'" %}
+{% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/observability/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}
 <div class="list-group">
 {% for post in posts %}

@@ -110,6 +110,7 @@
   document.querySelectorAll('#sidebar .nav-toggle').forEach(function (btn) {
     btn.addEventListener('click', function (e) {
       e.preventDefault();
+      e.stopPropagation();
       var item = btn.closest('.nav-item');
       var isOpen = item.classList.toggle('open');
       btn.setAttribute('aria-expanded', isOpen);

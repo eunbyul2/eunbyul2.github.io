@@ -22,54 +22,61 @@
       icon: fas fa-shield-halved
       url: /study-security_certification/
 
-- title: CKA 자격증 스터디
-  icon: fas fa-dharmachakra
-  url: /certi-cka/
-
-- title: KCNA 자격증 스터디
+- title: 자격증
   icon: fas fa-certificate
-  url: /certi-kcna/
+  children:
+    - title: CKA 자격증
+      icon: fas fa-dharmachakra
+      url: /certi-cka/
+    - title: KCNA 자격증
+      icon: fas fa-certificate
+      url: /certi-kcna/
+    - title: LFCS 자격증
+      icon: fas fa-certificate
+      url: /certi-lfcs/
 
-- title: LFCS 자격증 스터디
-  icon: fas fa-certificate
-  url: /certi-lfcs/
-
-- title: Kubernetes 공부
+- title: Kubernetes
   icon: fas fa-cubes
   url: /k8s/
+  children:
+    - title: Cilium
+      icon: fas fa-diagram-project
+      url: /cilium/
 
-- title: 네트워크 공부
+- title: 네트워크
   icon: fas fa-globe
   url: /network/
 
-- title: 스토리지 공부
+- title: 스토리지
   icon: fas fa-hdd
   url: /storage/
+  children:
+    - title: Ceph
+      icon: fas fa-circle-nodes
+      url: /ceph/
 
-- title: Ceph 공부
-  icon: fas fa-circle-nodes
-  url: /ceph/
+- title: DevOps
+  icon: fas fa-gears
+  children:
+    - title: Ansible
+      icon: fas fa-terminal
+      url: /ansible/
+    - title: Terraform
+      icon: fas fa-layer-group
+      url: /terraform/
 
-- title: Ansible 공부
-  icon: fas fa-terminal
-  url: /ansible/
+- title: MLOps
+  icon: fas fa-infinity
+  url: /mlops/
 
-- title: Cilium 공부
-  icon: fas fa-diagram-project
-  url: /cilium/
+- title: Observability
+  icon: fas fa-magnifying-glass-chart
+  url: /observability/
 
-- title: Terraform 공부
-  icon: fas fa-layer-group
-  url: /terraform/
-
-- title: OpenStack 공부
+- title: OpenStack
   icon: fas fa-cloud
   url: /openstack/
 
-- title: Linux 공부
+- title: Linux
   icon: fab fa-linux
   url: /linux/
-
-- title: 회사 업무 노트
-  icon: fas fa-building
-  url: /company/
