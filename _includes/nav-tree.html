@@ -1,6 +1,7 @@
 {%- comment -%}
   Recursive sidebar navigation tree, data-driven by _data/nav.yml. Supports
-  unlimited nesting depth: a leaf has `url`, a group has `children`.
+  unlimited nesting depth: a leaf has `url`, a group has `children`. Groups
+  render expanded by default (still click-to-collapse via the caret).
 
   Params:
     items  - array of nav nodes to render at this level
@@ -14,24 +15,15 @@
     {%- if item.url and item.url == page.url -%}
       {%- assign is_active = true -%}
     {%- endif -%}
-    {%- assign is_open = false -%}
-    {%- if item.children -%}
-      {%- capture active_check -%}{% include nav-active.html items=item.children %}{%- endcapture -%}
-      {%- if active_check contains 'yes' -%}
-        {%- assign is_open = true -%}
-      {%- endif -%}
-    {%- endif -%}
-    <li class="nav-item{% if item.children %} has-children{% endif %}{% if is_open %} open{% endif %}{% if is_active %} active{% endif %}">
+    <li class="nav-item{% if item.children %} has-children open{% endif %}{% if is_active %} active{% endif %}">
       {%- if item.children -%}
-        <a href="javascript:void(0)" role="button" class="nav-link nav-toggle" aria-expanded="{{ is_open }}" aria-controls="{{ item_id }}">
-          <i class="fa-fw {{ item.icon | default: 'fas fa-folder' }}"></i>
+        <a href="javascript:void(0)" role="button" class="nav-link nav-toggle" aria-expanded="true" aria-controls="{{ item_id }}">
           <span>{{ item.title }}</span>
           <i class="fa-fw fas fa-chevron-right nav-caret"></i>
         </a>
         {% include nav-tree.html items=item.children parent=item_id %}
       {%- else -%}
         <a href="{{ item.url | relative_url }}" class="nav-link">
-          <i class="fa-fw {{ item.icon | default: 'fas fa-file' }}"></i>
           <span>{{ item.title }}</span>
         </a>
       {%- endif -%}

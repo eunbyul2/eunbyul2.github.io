@@ -10,29 +10,40 @@
 
 /* append your custom style below */
 
-/* ----- Compact sidebar nav (Naver/Tistory-style tighter spacing) ----- */
+/* ----- Compact sidebar nav (Naver/Tistory-style tighter spacing, no icons) ----- */
 #sidebar ul {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 #sidebar ul li.nav-item a.nav-link {
-  padding-top: 0.35rem;
-  padding-bottom: 0.35rem;
+  padding-top: 0.25rem;
+  padding-bottom: 0.25rem;
+  font-weight: 500;
+}
+
+#sidebar ul li.nav-item a.nav-link span {
+  font-size: 82%;
 }
 
 #sidebar ul li.nav-item:not(:first-child) {
-  margin-top: 0.1rem;
+  margin-top: 0;
 }
 
-/* ----- Nested topic tree (collapsible groups, data-driven by _data/nav.yml) ----- */
+/* ----- Nested topic tree (always expanded, data-driven by _data/nav.yml) ----- */
 #sidebar .nav-sub {
   display: none;
   margin-bottom: 0;
-  padding-left: 1.1rem;
+  padding-left: 0.9rem;
+  margin-left: 0.6rem;
+  border-left: 1px solid var(--sidebar-border-color);
 }
 
 #sidebar .nav-item.open > .nav-sub {
   display: block;
+}
+
+#sidebar .has-children > .nav-toggle span {
+  font-weight: 700;
 }
 
 #sidebar .nav-toggle {
@@ -41,7 +52,8 @@
 
 #sidebar .nav-toggle .nav-caret {
   margin-left: auto;
-  font-size: 70%;
+  font-size: 60%;
+  opacity: 0.6;
   transition: transform 0.2s ease;
 }
 
@@ -50,47 +62,5 @@
 }
 
 #sidebar .nav-sub .nav-link span {
-  font-size: 85%;
-}
-
-/* ----- Tag cloud in sidebar ----- */
-#sidebar .sidebar-tags {
-  width: 100%;
-  padding-left: 2.5rem;
-  padding-right: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-#sidebar .sidebar-tags-title {
-  font-size: 80%;
-  font-weight: 700;
-  opacity: 0.6;
-  margin-bottom: 0.5rem;
-  letter-spacing: 0.5px;
-}
-
-#sidebar .sidebar-tags-cloud {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-#sidebar .tag-chip {
-  font-size: 80%;
-  padding: 0.15rem 0.6rem;
-  border-radius: 999px;
-  background-color: var(--sidebar-hover-bg);
-  color: inherit;
-  opacity: 0.85;
-  text-decoration: none;
-}
-
-#sidebar .tag-chip:hover {
-  opacity: 1;
-}
-
-#sidebar .tag-chip .tag-count {
-  opacity: 0.6;
-  margin-left: 0.25rem;
-  font-size: 90%;
+  font-size: 76%;
 }

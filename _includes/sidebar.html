@@ -1,10 +1,10 @@
 {% comment %}
   The Side Bar. Overrides the theme's default _includes/sidebar.html.
   Difference from the original: the flat per-tab loop over site.tabs is
-  replaced by (a) a short pinned list for categories/archives/about and
-  (b) a recursive tree rendered from _data/nav.yml (see nav-tree.html), plus
-  a tag cloud. Everything else (profile header, mode toggle, social icons)
-  is unchanged from the theme.
+  replaced by (a) a short pinned list for archives and (b) a recursive,
+  always-expanded tree rendered from _data/nav.yml (see nav-tree.html).
+  Everything else (profile header, mode toggle, social icons) is
+  unchanged from the theme.
 {% endcomment %}
 
 <aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column align-items-end">
@@ -48,19 +48,6 @@
 
     <!-- topic tree, data-driven from _data/nav.yml -->
     {% include nav-tree.html items=site.data.nav root=true parent="navroot" %}
-
-    {% if site.tags.size > 0 %}
-      <div class="sidebar-tags">
-        <div class="sidebar-tags-title">TAGS</div>
-        <div class="sidebar-tags-cloud">
-          {% for tag in site.tags %}
-            <a class="tag-chip" href="{{ tag[0] | slugify | prepend: '/tags/' | append: '/' | relative_url }}">
-              {{ tag[0] }}<span class="tag-count">{{ tag[1].size }}</span>
-            </a>
-          {% endfor %}
-        </div>
-      </div>
-    {% endif %}
   </nav>
 
   <div class="sidebar-bottom d-flex flex-wrap  align-items-center w-100">

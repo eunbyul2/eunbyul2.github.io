@@ -1,11 +1,11 @@
 ---
 layout: page
-title: KCNA 자격증 스터디
+title: KCNA 자격증 공부
 icon: fas fa-certificate
 order: 21
 ---
 
-> KCNA(Kubernetes and Cloud Native Associate) 자격증 스터디 기록
+> KCNA(Kubernetes and Cloud Native Associate) 자격증 공부 기록
 
 {% assign posts = site.posts | where_exp: "post", "post.path contains '_posts/certi-kcna/'" %}
 {% assign posts = posts | sort: 'date' | reverse %}

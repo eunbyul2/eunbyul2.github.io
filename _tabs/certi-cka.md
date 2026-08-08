@@ -1,6 +1,6 @@
 ---
 layout: page
-title: CKA 자격증 스터디
+title: CKA 자격증 공부
 icon: fas fa-dharmachakra
 order: 6
 ---
