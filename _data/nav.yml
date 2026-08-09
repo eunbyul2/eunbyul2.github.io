@@ -58,6 +58,9 @@
     - title: Ceph
       icon: fas fa-circle-nodes
       url: /ceph/
+    - title: RustFS
+      icon: fas fa-database
+      url: /rustfs/
 
 - title: DevOps
   icon: fas fa-gears

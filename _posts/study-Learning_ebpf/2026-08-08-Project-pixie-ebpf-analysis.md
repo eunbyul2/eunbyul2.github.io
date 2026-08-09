@@ -17,6 +17,12 @@ Learning eBPF Chapter 1~4에서는 eBPF Program이 Kernel Event에 연결되어 
 
 ## 1. Pixie란?
 
+https://github.com/pixie-io/pixie
+
+![pixie1](/img/pixie1.png)
+![pixie2](/img/pixie2.png)
+![pixie3](/img/pixie3.png)
+
 Pixie는 Kubernetes 환경에서 Application과 Infrastructure의 동작을 관찰하기 위한 Observability Open Source이다.
 
 Pixie 내부에서 실제 Node의 데이터를 수집하는 구성요소 중 하나가 **Stirling**이다. Stirling README에서는 Stirling을 각 Node에서 실행되는 data collector로 설명하며, Linux API와 eBPF를 이용해 Linux Kernel, System Library, Application에서 데이터를 수집한다고 설명한다.
