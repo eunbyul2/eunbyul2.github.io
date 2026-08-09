@@ -71,21 +71,21 @@ src/stirling/
 └── source_connectors/
     └── socket_tracer/
         ├── socket_trace_connector.cc
-        │   └── BCC 초기화 / Probe Attach / Perf Buffer User Space 처리
+        │              : BCC 초기화 / Probe Attach / Perf Buffer User Space 처리
         │
-        ├── bcc_bpf/
+        ├── bcc_bpf/   : BCC가 compile하는 실제 BPF C 코드 폴더
         │   ├── socket_trace.c
-        │   │   └── Kernel에서 실행되는 Socket Tracing eBPF Program
+        │   │          : Kernel에서 실행되는 Socket Tracing eBPF Program
         │   │
         │   └── protocol_inference.h
-        │       └── Application Protocol Inference
+        │              : Application Protocol Inference
         │
-        └── bcc_bpf_intf/
+        └── bcc_bpf_intf/  : Kernel → User Space로 전달할 데이터 구조 정의 폴더 (실제 데이터 전달은 BPF Map이나 Buffer를 통해 이뤄짐)
             ├── socket_trace.h
-            │   └── Connection State / Event Structure
+            │          : Connection State / Event Structure
             │
             └── common.h
-                └── Protocol / Direction / Message / Connection 공통 Type
+                       : Protocol / Direction / Message / Connection 공통 Type
 ```
 분석 범위는 Pixie 저장소의 `src/stirling/source_connectors/socket_tracer`를 중심으로 하며, Pixie 전체 Architecture나 Pixie의 User Space Protocol Parser, ConnTracker, PxL, Vizier 등 이후 Pipeline은 이번 eBPF 분석 범위에서는 제외했다. 해당 영역까지 확장하면 eBPF 자체보다 Pixie 전체 Observability Architecture 분석에 가까워지기 때문이다.
 
