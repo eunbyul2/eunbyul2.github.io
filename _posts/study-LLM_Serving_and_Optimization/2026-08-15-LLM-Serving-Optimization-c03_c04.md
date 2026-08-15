@@ -7,7 +7,7 @@ tags: [LLM, Model Serving, vLLM, Multi-Model Serving, RAG, Kubernetes, Ray Serve
 published: true
 ---
 
-# Chapter 3. Building a Model Serving System from Scratch
+# Chapter 3. Model Serving System Design: A Deep Dive
 
 Chapter 2에서는 LLM이 실제로 어떻게 Token을 생성하는지, KV Cache가 왜 필요한지, Prefill/Decode가 어떻게 나뉘는지, Streaming과 Batching이 왜 필요한지를 살펴봤다.
 
@@ -775,7 +775,7 @@ Single-Model과 Multi-Model도 단순히 모델 개수 차이가 아니라 운�
 
 ---
 
-# Chapter 4. LLM Serving Best Practices
+# Chapter 4. Model Serving Best Practices
 
 Chapter 3에서는 Single-Model과 Multi-Model Serving System을 직접 설계하면서 하나의 Serving Service 내부가 어떻게 동작하는지를 살펴봤다.
 
