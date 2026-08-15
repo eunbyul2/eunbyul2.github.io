@@ -835,6 +835,8 @@ LLM의 크기가 계속 커지는 만큼 앞으로는 Optimization의 중요성�
 
 앞으로는 이러한 개념을 바탕으로 실제 Model Server와 다양한 Serving Framework들을 하나씩 학습하게 된다.
 
+<br/><br/>
+
 ---
 # Chapter 2. Large Language Model Serving
 

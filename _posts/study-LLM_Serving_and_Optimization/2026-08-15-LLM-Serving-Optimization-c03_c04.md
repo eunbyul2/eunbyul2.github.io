@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[Hands-On LLM Serving and Optimization] Chapter 3·4"
-date: 2026-08-26 19:20:00 +0900
+date: 2026-08-15 19:20:00 +0900
 categories: [LLMOps, LLM Serving]
 tags: [LLM, Model Serving, vLLM, Multi-Model Serving, RAG, Kubernetes, Ray Serve]
 published: true
