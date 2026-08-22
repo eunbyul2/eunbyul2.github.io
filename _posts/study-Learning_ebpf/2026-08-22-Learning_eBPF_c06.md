@@ -570,8 +570,6 @@ int xdp_hello(struct xdp_md *ctx)
 
 `data`는 Packet이 시작하는 위치이고 `data_end`는 Packet의 끝을 나타낸다.
 
-![XDP Packet data와 data_end](/img/study-Learning_eBPF/XDP%20Packet%20data-data_end.png)
-
 개념적으로 보면 다음과 같다.
 
 ```text
