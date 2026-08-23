@@ -438,7 +438,7 @@ invalid access to map value
 
 # 7. NULL Pointer 예제로 이해하는 Verifier
 
-이번 Chapter에서 Verifier의 동작을 가장 잘 보여준다고 느낀 예제는 `bpf_map_lookup_elem()`의 반환값 처리였다.
+`bpf_map_lookup_elem()`의 반환값 처리
 
 ```c
 p = bpf_map_lookup_elem(&my_config, &uid);
