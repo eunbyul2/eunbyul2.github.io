@@ -590,6 +590,22 @@ R0 !read_ok
 
 한 가지 흥미로운 점은 Helper Function의 Return Value 역시 R0를 사용한다는 것이다.
 
+```int prog(void *ctx)
+{
+    bpf_get_current_pid_tgid();
+}
+```
+
+이 코드를 예로 들면:
+
+```bpf_get_current_pid_tgid()
+        ↓
+Helper Return Value가 R0에 저장됨
+        ↓
+Program 종료 시
+R0가 NOT_INIT 상태는 아님
+```
+
 즉 Source Code에서 명시적인 `return`이 없더라도 직전에 Helper를 호출했다면 Helper Return Value가 R0에 들어가 있기 때문에 단순한 `R0 !read_ok` Error가 발생하지 않을 수도 있다.
 
 하지만 이것은 **`return`을 생략해도 된다는 뜻이 아니다.**
