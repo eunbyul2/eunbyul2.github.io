@@ -45,6 +45,19 @@
       icon: fas fa-diagram-project
       url: /cilium/
 
+- title: GPU
+  icon: fas fa-microchip
+  children:
+    - title: GPU
+      icon: fas fa-microchip
+      url: /gpu/
+    - title: HAMi
+      icon: fas fa-share-nodes
+      url: /hami/
+    - title: MIG
+      icon: fas fa-puzzle-piece
+      url: /mig/
+
 - title: 네트워크
   icon: fas fa-globe
   url: /network/
