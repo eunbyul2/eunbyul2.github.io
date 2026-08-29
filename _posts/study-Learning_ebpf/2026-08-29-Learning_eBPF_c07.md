@@ -588,7 +588,7 @@ Traffic Control
 
 Chapter 7의 그림을 보면 eBPF Program이 Network Stack의 한 곳에서만 실행되는 것이 아니라 여러 Layer에 Attach될 수 있다는 점을 확인할 수 있다.
 
-![BPF program types hook into various points in the network stack](./assets/img/learning-ebpf/chapter7-bpf-program-types.png)
+![BPF program types hook into various points in the network stack](/img/study-Learning_eBPF/chapter7-bpf-program-types.png)
 
 대략적인 위치를 단순화하면 다음과 같다.
 
