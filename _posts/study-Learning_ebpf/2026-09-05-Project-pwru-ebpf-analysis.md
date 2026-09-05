@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "[eBPF Open Source] Cilium pwru로 보는 kprobe 기반 Packet Tracing"
-date: 2026-09-05 19:30:00 +0900
+date: 2026-09-05 18:05:00 +0900
 categories: [eBPF, Cilium, Observability]
 tags: [eBPF, pwru, Cilium, kprobe, kprobe-multi, BTF, CO-RE, BPF Map, sk_buff, Network Debugging]
 published: true
