@@ -399,6 +399,8 @@ cont:
 
 **2) BPF Map이 여기서도 Cross-Invocation State Store로 쓰인다.** Pixie 분석 때 Entry/Return Probe 사이의 State를 Map으로 연결했던 것과 같은 패턴인데, `pwru`에서는 "서로 다른 kprobe(서로 다른 함수, 서로 다른 실행 시점)들 사이에서 같은 Packet을 추적"하는 데 쓰인다.
 
+위 코드에서 `...`로 생략한 부분에는 사실 추적 방식이 하나 더 있다. `skb_addresses`(주소 기반) 조회가 실패하면, `--filter-track-skb-by-stackid` 옵션이 켜져 있는 경우 `stackid_skb`라는 또 다른 Map을 Stack ID로 조회한다. 이게 필요한 이유는, Bridge를 통과하는 Packet처럼 원본 skb가 Kernel 내부에서 Free된 뒤 새로운 skb로 다시 생성되는 경우가 있기 때문이다. 이 경우 skb 주소 자체가 바뀌어버려서 `skb_addresses` Map으로는 더 이상 같은 Packet임을 알아볼 수 없다. 대신 `get_stackid()`가 계산한 Call Stack 기반 ID로 연결해 추적을 이어간다. 즉 `pwru`는 "주소가 바뀌지 않는 일반적인 경우"와 "주소 자체가 무의미해지는 경우"를 서로 다른 Key(주소 vs Stack ID)로 나눠 대응하고 있다.
+
 ## 7.1 `filter()`: 세 조건의 AND
 
 `handle_everything`에서 호출하는 `filter(skb)`의 실제 정의는 아래와 같다.
