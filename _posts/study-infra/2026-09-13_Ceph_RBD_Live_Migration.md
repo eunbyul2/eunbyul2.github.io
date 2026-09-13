@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "[Ceph] RBD Live Migration 동작 원리와 중단 시 대응"
+title: "Ceph RBD Live Migration 동작 원리와 중단 시 대응"
 date: 2026-09-13 16:00:00 +0900
 categories: [Infrastructure, Ceph, Storage]
 tags: [Ceph, RBD, Live Migration, Block Storage, Troubleshooting, OpenStack]
