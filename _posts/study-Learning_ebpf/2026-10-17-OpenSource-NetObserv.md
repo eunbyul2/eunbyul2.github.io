@@ -9,83 +9,85 @@ published: true
 
 ## 1. NetObserv eBPF Agent를 선택한 이유
 
-『Learning eBPF』를 공부하면서 eBPF 프로그램의 **Hook**, **BPF Map**, **Kernel Space와 User Space의 데이터 전달**을 배웠다. 하지만 실제 오픈소스에서는 이 기능들이 어떻게 연결되는지 궁금했다.
+『Learning eBPF』에서 **Hook, BPF Map, Kernel Space와 User Space**를 배웠다. 그런데 실제 오픈소스에서는 이 개념들이 어떻게 연결되어 동작하는지 궁금했다.
 
-Kubernetes에서 Pod가 `Running`이라고 해도 네트워크 통신이 정상이라는 뜻은 아니다. 네트워크에서 실제로 어떤 통신이 발생했는지 살펴볼 수 있는 프로젝트를 찾다가 [NetObserv eBPF Agent](https://github.com/netobserv/netobserv-ebpf-agent)를 선택했다.
+Kubernetes에서 Pod가 `Running`이어도 통신이 정상이라는 뜻은 아니다. 실제로 어떤 IP와 포트 사이에서 트래픽이 발생했는지 관측하는 방법을 공부하기 위해 [NetObserv eBPF Agent](https://github.com/netobserv/netobserv-ebpf-agent)를 선택했다.
+
+이번에는 모든 기능을 분석하기보다 **패킷이 Flow 통계로 바뀌고 User Space로 전달되는 경로**를 직접 따라가 봤다.
 
 ## 2. NetObserv는 어떤 오픈소스인가?
 
-NetObserv는 Linux/Kubernetes 네트워크를 관측하기 위한 프로젝트다. 여러 구성요소 중 이번에 분석한 것은 **네트워크 데이터를 실제로 수집하는 `netobserv-ebpf-agent`**이다.
+NetObserv는 Linux/Kubernetes 환경에서 네트워크 통신을 관측하기 위한 프로젝트다. 그중 `netobserv-ebpf-agent`는 eBPF를 이용해 네트워크 정보를 수집하는 구성요소다.
 
 | 구성요소 | 역할 |
 |---|---|
-| [netobserv-ebpf-agent](https://github.com/netobserv/netobserv-ebpf-agent) | eBPF로 네트워크 정보 수집·집계 |
-| [flowlogs-pipeline](https://github.com/netobserv/flowlogs-pipeline) | 수집된 Flow 데이터를 처리하는 후속 구성요소 |
-| [netobserv-operator](https://github.com/netobserv/netobserv-operator) | Kubernetes 환경의 배포·설정 관리 |
+| [`netobserv-ebpf-agent`](https://github.com/netobserv/netobserv-ebpf-agent) | eBPF로 패킷 관측 및 Flow 집계 |
+| [`flowlogs-pipeline`](https://github.com/netobserv/flowlogs-pipeline) | 수집된 Flow의 후속 처리 |
+| [`netobserv-operator`](https://github.com/netobserv/netobserv-operator) | Kubernetes 배포와 설정 관리 |
 
-Agent에는 **Flow Capture(기본)**와 **Packet Capture** 두 모드가 있다. 이번 글에서는 `ENABLE_PCA=false`인 **Flow Capture**만 분석했다. Packet Capture 모드는 별도 eBPF 프로그램(`bpf/packets/packets.c`)을 사용한다.
+Agent에는 **Flow Capture(기본, `ENABLE_PCA=false`)**와 **Packet Capture(`ENABLE_PCA=true`)**가 있다. 두 모드는 서로 다른 eBPF 오브젝트를 사용한다. 이번 글은 `bpf/flows/flows.c`를 사용하는 Flow Capture만 다룬다.
 
-## 3. 전체 동작 구조부터 보기
+> NetObserv Agent는 패킷을 전달하는 CNI가 아니라 **이미 발생하는 네트워크 통신을 관측하는 도구**다.
+
+## 3. 먼저 전체 흐름 이해하기
 
 ![NetObserv eBPF Agent의 데이터 흐름](/img/study-Learning_eBPF/netobserv-flow-infographic.png)
 
-*NetObserv의 기본 Flow Capture 경로를 간단히 나타낸 그림. 실제 Hook과 출력 경로는 설정에 따라 달라진다.*
-
 ```mermaid
 flowchart TD
-    A[Linux / Kubernetes 네트워크 패킷] --> B[TC / TCX Hook]
-    B --> C[Kernel: flows.c]
-    C --> D[BPF Hash Map: aggregated_flows]
-    D --> E[Go: Fetcher / MapTracer]
-    E --> F[Flow Record]
-    F --> G[Exporter: gRPC / Kafka / IPFIX / direct-flp]
+    A["네트워크 패킷"] --> B["TC / TCX Hook"]
+    B --> C["Kernel: flow_monitor()"]
+    C --> D["BPF Map: aggregated_flows"]
+    D --> E["Go Fetcher: 조회·삭제"]
+    E --> F["MapTracer: Record 변환"]
+    F --> G["Exporter: gRPC / Kafka / IPFIX / direct-flp"]
 ```
 
-이 구조에서 역할이 나뉜다.
+- **Kernel Space:** 패킷을 관측하고 같은 통신의 패킷 수·바이트 수 등을 BPF Map에 누적한다.
+- **User Space(Go):** 누적된 정보를 일정 주기로 가져와 정리하고 외부에 전달한다.
 
-- **Kernel Space:** 패킷을 관측하고 같은 통신의 정보를 BPF Map에 누적한다.
-- **User Space(Go Agent):** Map에 누적된 값을 주기적으로 가져와 정리하고 외부로 전달한다.
+### Packet과 Flow는 무엇이 다를까?
 
-참고로 NetObserv는 **네트워크 통신 자체를 연결하는 CNI가 아니라, 통신 정보를 관측하는 Agent**다.
+- **Packet:** 네트워크를 지나는 개별 데이터 단위
+- **Flow:** 출발지·목적지 IP, 포트, 프로토콜 등의 조합으로 식별한 통신 흐름
 
-## 4. 실제로 살펴본 파일
+```mermaid
+flowchart LR
+    P1["Packet 1 · 100 B"] --> ID["같은 Flow ID"]
+    P2["Packet 2 · 200 B"] --> ID
+    P3["Packet 3 · 150 B"] --> ID
+    ID --> M["Flow 통계: 3 packets / 450 B"]
+```
 
-전체 소스코드를 모두 읽기보다, **패킷 관측 → Flow 집계 → User Space 전달** 경로에 해당하는 파일을 따라갔다.
+동일한 Flow의 패킷 세 개가 관측되면 패킷마다 별도 기록을 보내는 대신 **하나의 Flow 항목에 통계를 누적**할 수 있다. 위 수치는 이해를 위한 예시다(샘플링 및 중복 관측 제외).
+
+[공식 설계 문서](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/ebpf_implementation.md)를 보면, 이전의 패킷별 Ring Buffer 전달 방식은 이벤트가 많아질수록 User Space 처리 부담이 커질 수 있었다. **Kernel에서 먼저 Flow별로 묶어 전달량을 줄이는 것**이 핵심 설계 의도다.
+
+## 4. 분석한 소스코드
 
 ```text
 netobserv-ebpf-agent/
 ├── bpf/
-│   ├── flows/flows.c              # 패킷 관측과 Flow 집계
-│   ├── types.h                    # flow_id, flow_metrics 정의
-│   └── maps_definition.h          # BPF Map 정의
+│   ├── flows/flows.c             # TC Hook, 패킷 처리, Flow 집계
+│   ├── types.h                   # flow_id / flow_metrics 구조체
+│   └── maps_definition.h         # BPF Map 정의
 ├── pkg/
-│   ├── flow/tracer_map.go         # Map 수집 주기, Record 변환
-│   ├── tracer/flows/fetcher.go    # BPF Map 조회 및 삭제
-│   └── agent/flows/agent.go       # Agent 구성, Exporter 선택
+│   ├── flow/tracer_map.go        # 수집 주기 및 Record 변환
+│   ├── tracer/flows/fetcher.go   # BPF Map 조회·삭제
+│   └── agent/flows/agent.go      # Agent 구성 및 Exporter 선택
 └── docs/
     ├── architecture.md
-    └── flows/architecture.md
+    ├── flows/architecture.md
+    └── ebpf_implementation.md
 ```
 
-### 4-1. Packet과 Flow의 차이
-
-**Packet**은 실제 네트워크를 지나는 개별 데이터이고, **Flow**는 출발지·목적지 주소, 포트, 프로토콜 등 공통 정보로 구분한 통신 흐름이다.
-
-```mermaid
-flowchart LR
-    A[Pod A] -->|Packet 1| B[Pod B]
-    A -->|Packet 2| B
-    A -->|Packet 3| B
-    B --> C[같은 Flow의 통계\npackets = 3]
-```
-
-예를 들어 같은 Flow에 속하는 패킷이 3개 관측되면, NetObserv는 이를 반드시 세 개의 별도 레코드로 보내기보다 **하나의 Flow 통계에 누적**할 수 있다. 위 예시는 샘플링이나 중복 관측 조건을 제외한 단순한 설명이다.
+코드 전체를 설명하기보다는 **각 파일에서 데이터가 다음 단계로 이동하는 지점**을 중심으로 살펴봤다.
 
 ## 5. Kernel Space: 패킷을 관측하고 Flow를 집계한다
 
-### 5-1. TC Hook에서 eBPF 프로그램 실행
+### 5-1. 패킷이 들어오면 어떤 함수가 실행될까? — `flows.c`
 
-**파일:** [`bpf/flows/flows.c`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/flows/flows.c)
+[소스코드: `bpf/flows/flows.c`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/flows/flows.c)
 
 ```c
 SEC("classifier/tc_ingress")
@@ -99,35 +101,66 @@ int tc_egress_flow_parse(struct __sk_buff *skb) {
 }
 ```
 
-패킷이 해당 인터페이스의 TC Ingress/Egress 지점에 도착하면 연결된 eBPF 프로그램이 실행된다. 두 진입점은 공통 함수인 `flow_monitor()`를 호출한다. 현재 코드에는 TCX와 Netkit용 진입점도 있다.
+- **Ingress / Egress:** 네트워크 인터페이스로 들어오는 방향 / 나가는 방향
+- **`SEC(...)`:** eBPF 프로그램이 컴파일된 오브젝트의 어느 Section에 배치되는지 지정
+- **`__sk_buff *skb`:** 패킷에 관한 정보에 접근하는 Context
+- **`flow_monitor()`:** 두 방향에서 공통으로 호출하는 패킷·Flow 처리 함수
 
-`flow_monitor()`는 패킷의 길이, 관측 시각, 헤더 정보 등을 확인하고, 설정에 따른 샘플링·필터링을 거친 뒤 Flow 정보를 처리한다.
+따라서 프로그램이 계속 패킷을 찾아다니는 것이 아니라, **Hook에 연결된 뒤 해당 지점에서 패킷을 처리할 때 실행되는 구조**다. 실제 파일에는 TCX와 Netkit용 진입점도 있다.
 
-### 5-2. 어떤 통신인지, 얼마나 통신했는지 구분
+### 5-2. `flow_monitor()`는 패킷에서 무엇을 확인할까?
 
-**파일:** [`bpf/types.h`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/types.h)
+```c
+pkt.current_ts = bpf_ktime_get_ns();
+void *data_end = (void *)(long)skb->data_end;
+void *data = (void *)(long)skb->data;
+u64 len = skb->len;
+```
 
-| 구조체 | 저장하는 정보 | 역할 |
+패킷의 **관측 시각, 데이터 범위, 길이** 등을 확인한다. 이후 Ethernet Header를 해석하고, 설정에 따른 필터링과 샘플링을 적용한다.
+
+여기서 `data_end`는 패킷 범위 밖을 잘못 읽지 않도록 확인할 때 필요하다. 『Learning eBPF』에서 배운 **Verifier와 안전한 메모리 접근** 개념이 연결되는 부분이다.
+
+```c
+if (fill_ethhdr(eth, data_end, &pkt, &eth_protocol) == DISCARD) {
+    return TC_ACT_OK;
+}
+```
+
+이 코드의 `DISCARD`는 **NetObserv의 분석 대상에서 제외**한다는 의미로 이해해야 한다. `TC_ACT_OK`로 반환하므로 이 분기가 네트워크 패킷을 실제로 Drop하는 코드는 아니다.
+
+### 5-3. `flow_id`와 `flow_metrics`는 왜 구분할까?
+
+[소스코드: `bpf/types.h`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/types.h)
+
+| 자료구조 | 주요 정보 | 질문 |
 |---|---|---|
-| `flow_id` | 출발지·목적지 IP, 포트, 프로토콜, ICMP 정보 | **어떤 통신인가?** |
-| `flow_metrics` | 패킷 수, 바이트 수, 관측 시각, 인터페이스 등 | **얼마나 관측했는가?** |
+| `flow_id` | 출발지/목적지 IP·포트, 프로토콜, ICMP Type/Code | **어떤 통신인가?** |
+| `flow_metrics` | 패킷 수, 바이트 수, 시작/종료 관측 시각, 인터페이스, TCP Flags 등 | **얼마나 관측했는가?** |
 
-이를 저장하는 Map은 다음과 같이 선언되어 있다.
+예를 들어 `10.0.0.10:50000 → 10.0.0.20:8080 / TCP`라는 통신을 `flow_id`로 구분하고, 그 통신에서 누적된 패킷 수와 바이트 수를 `flow_metrics`에 저장한다.
 
-**파일:** [`bpf/maps_definition.h`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/maps_definition.h)
+[소스코드: `bpf/maps_definition.h`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/bpf/maps_definition.h)
 
 ```c
 struct {
     __uint(type, BPF_MAP_TYPE_HASH);
     __type(key, flow_id);
     __type(value, flow_metrics);
-    // ...
+    // 나머지 설정 생략
 } aggregated_flows SEC(".maps");
 ```
 
-즉 `aggregated_flows`는 **Flow ID를 Key로, Flow 통계를 Value로 사용하는 BPF Hash Map**이다.
+즉 **`aggregated_flows` = `flow_id`를 Key, `flow_metrics`를 Value로 하는 BPF Hash Map**이다.
 
-### 5-3. 이미 기록한 통신이라면 통계를 갱신
+| Key (`flow_id`) | Value (`flow_metrics`) — 예시 |
+|---|---|
+| A:50000 → B:8080 / TCP | 3 packets / 450 B |
+| C:51000 → B:443 / TCP | 8 packets / 2,400 B |
+
+### 5-4. 기존 Flow가 있으면 갱신하고, 없으면 생성한다
+
+다시 `flows.c`로 돌아가면 다음 코드가 나온다.
 
 ```c
 flow_metrics *aggregate_flow =
@@ -137,81 +170,124 @@ if (aggregate_flow != NULL) {
     update_existing_flow(aggregate_flow, &pkt, len,
                          flow_sampling, skb->ifindex, direction, &tls);
 } else {
-    // 새로운 Flow 항목 생성 및 Map 등록
+    // 새로운 flow_metrics를 만들어 Map 등록 시도 (상세 코드 생략)
 }
 ```
 
-*설명을 위해 `else` 내부의 상세 코드는 생략했다.*
+`bpf_map_lookup_elem()`은 지금 패킷의 `flow_id`와 같은 Key가 있는지 조회한다. **있으면 기존 통계를 갱신하고, 없으면 새 항목을 만든다.**
 
 ```mermaid
 flowchart TD
-    A[패킷에서 Flow ID 구성] --> B[aggregated_flows 조회]
-    B --> C{같은 Flow가 있는가?}
-    C -->|있음| D[기존 packets / bytes 갱신]
-    C -->|없음| E[새 Flow 항목 등록 시도]
-    D --> F[관측 결과 누적]
-    E --> F
+    A["현재 패킷의 Flow ID"] --> B["BPF Map 조회"]
+    B --> C{"같은 Flow ID 존재?"}
+    C -->|예| D["기존 통계 갱신"]
+    C -->|아니요| E["새 Flow 등록 시도"]
+    E -->|성공| F["Map에 저장"]
+    E -->|실패| G["오류 처리 / 선택적 Ring Buffer"]
 ```
 
-여기서 패킷을 여러 인터페이스에서 중복 관측할 수 있다는 점도 고려한다. `update_existing_flow()`는 **처음 관측한 인터페이스를 기준으로 주요 패킷·바이트 통계를 갱신**한다. 또한 여러 CPU가 같은 통계를 수정할 때 충돌하지 않도록 Lock을 사용한다.
+여기서 실제 코드를 읽으며 새롭게 알게 된 점이 두 가지 있었다.
 
-처음에는 Map을 단순한 Key–Value 저장소로만 생각했는데, 실제 코드를 보니 **같은 통신을 묶고 통계를 관리하는 데 사용**하고 있었다.
+**① 여러 인터페이스에서 같은 패킷을 관측할 수 있다.**
 
-## 6. User Space: BPF Map의 데이터를 가져온다
+```c
+if (aggregate_flow->if_index_first_seen == if_index) {
+    aggregate_flow->packets += 1;
+    aggregate_flow->bytes += len;
+}
+```
 
-여기서부터는 Go 코드다. 핵심은 **Map에 쌓인 데이터를 누가 가져가느냐**이다.
+네트워크 패킷이 여러 인터페이스를 지나면 같은 Flow가 여러 위치에서 보일 수 있다. 따라서 **처음 관측한 인터페이스를 기준으로 주요 카운터를 갱신**해 중복 집계를 줄인다. 다른 인터페이스에서 관측된 사실은 별도로 기록할 수 있다.
 
-### 6-1. `MapTracer`가 주기적으로 수집을 요청
+**② 여러 CPU가 같은 Flow를 동시에 갱신할 수 있다.**
 
-**파일:** [`pkg/flow/tracer_map.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/flow/tracer_map.go)
+이 때문에 `update_existing_flow()`는 `bpf_spin_lock()`으로 주요 갱신 구간을 보호한다. 새 Key를 동시에 등록하려는 경우를 위한 `BPF_NOEXIST`와 `-EEXIST` 처리도 있다. 세부 문법보다 **실제 운영 환경에서는 동시 실행까지 고려해야 한다**는 점이 중요했다.
+
+## 6. User Space: Map의 통계를 가져와 외부로 전달한다
+
+Kernel에서 집계했다면 **누가 이 정보를 가져갈까?** 이번에는 Go 코드를 따라갔다.
+
+### 6-1. `MapTracer` — 주기적으로 가져오도록 요청
+
+[소스코드: `pkg/flow/tracer_map.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/flow/tracer_map.go)
+
+`TraceLoop()`에서 설정된 수집 주기로 Ticker를 실행하고, `Flush()` 신호가 들어오면 `evictFlows()`가 처리한다.
 
 ```go
 flows := m.mapFetcher.LookupAndDeleteMap(m.metrics)
 ```
 
-`MapTracer`는 설정된 주기에 따라 Flow 수집을 요청한다. 가져온 데이터는 `model.Record` 형태로 변환하고, Go Channel을 통해 다음 처리 단계로 전달한다.
+여기서 **Eviction**은 집계된 Flow 정보를 가져오고 Map에서 정리하는 작업이다. `MapTracer`는 반환된 Flow 데이터를 `model.Record`로 변환해 Go Channel로 후속 단계에 전달한다.
 
-### 6-2. `Fetcher`가 실제 Map 항목을 조회·삭제
+### 6-2. `Fetcher` — 실제 BPF Map 조회·삭제
 
-**파일:** [`pkg/tracer/flows/fetcher.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/tracer/flows/fetcher.go)
+[소스코드: `pkg/tracer/flows/fetcher.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/tracer/flows/fetcher.go)
 
 ```go
 flowMap := m.objects.AggregatedFlows
-
-if err := flowMap.LookupAndDelete(&id, &baseMetrics); err != nil {
-    // 오류 처리
-}
+// 먼저 Map의 Flow ID 목록을 수집한 뒤, 각 ID에 대해:
+err := flowMap.LookupAndDelete(&id, &baseMetrics)
 ```
 
-이 코드는 기본 Flow Map의 **한 항목을 읽고 삭제**한다. 이렇게 데이터를 꺼내면 Map에 새 통계를 다시 쌓을 공간을 확보할 수 있다. 지원되지 않는 환경을 위한 기존(Legacy) 방식도 준비되어 있다.
+- `m.objects.AggregatedFlows`: C에서 정의한 기본 Flow Map에 접근하는 Go 객체
+- `LookupAndDelete()`: **하나의 Flow 항목을 읽으면서 삭제**하는 작업
 
-DNS, Packet Drop 등의 기능을 활성화했다면 별도 Map에서 가져온 추가 정보를 Flow 데이터에 합치는 처리도 수행한다.
+코드에서는 먼저 Flow ID 목록을 모은 다음, 각 ID에 대해 조회·삭제를 실행한다. **Map 전체가 한 번에 삭제되는 것은 아니다.** 가져간 항목이 제거되면 동일 통신이 나중에 관측될 때 새 항목을 만들어 다시 집계할 수 있다.
 
-### 6-3. 어디로 전달할까?
+조회·삭제 API를 지원하지 않는 경우에는 `legacyLookupAndDeleteMap()`을 사용한다. 여기서는 이 정도로만 이해했다.
 
-**파일:** [`pkg/agent/flows/agent.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/agent/flows/agent.go)
+또 DNS, Packet Drop 등 확장 기능이 활성화되면 별도의 BPF Map에 저장된 정보를 추가로 가져와 Flow 정보와 합친다.
 
-설정에 따라 `gRPC`, `Kafka`, `IPFIX`, `direct-flp` 같은 Export 방식을 선택한다. 실제 데이터는 후속 Collector나 Flowlogs Pipeline 등에서 처리할 수 있다.
+### 6-3. `agent.go` — Record를 내보내는 방법 선택
 
-## 7. 코드를 읽으며 발견한 특징
+[소스코드: `pkg/agent/flows/agent.go`](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/pkg/agent/flows/agent.go)
 
-| 특징 | 소스에서 확인한 내용 |
+```mermaid
+flowchart LR
+    A["BPF Map"] --> B["Fetcher: 조회·삭제"]
+    B --> C["MapTracer: Record 변환"]
+    C --> D["후속 처리"]
+    D --> E["Exporter: 외부 전달"]
+```
+
+`buildFlowExporter()`를 확인해 보니 `gRPC`, `Kafka`, `IPFIX`, `direct-flp` 중 설정에 맞는 Exporter를 선택한다. 따라서 NetObserv Agent는 **수집뿐 아니라 다른 시스템에서 사용할 수 있게 전달하는 부분까지** 담당한다.
+
+> 그림은 데이터 흐름을 단순화한 것이다. 실제 함수 호출은 `MapTracer`가 `Fetcher.LookupAndDeleteMap()`을 호출한다.
+
+## 7. 코드에서 발견한 설계 특징
+
+| 특징 | 직접 확인한 구현 |
 |---|---|
-| **Flow 단위 집계** | 패킷마다 전달하는 대신 Hash Map에 통계를 누적 |
-| **중복 관측 고려** | 최초 관측 인터페이스를 기준으로 주요 카운터 갱신 |
-| **동시 실행 고려** | 여러 CPU의 Map 갱신을 위한 Lock 및 등록 경쟁 처리 |
-| **전달 실패 대비** | 새 Flow를 Map에 넣지 못한 일부 상황에서 설정에 따라 Ring Buffer 사용 |
+| Flow 기반 집계 | 패킷별 이벤트를 매번 전송하기보다 BPF Hash Map에 통계를 누적 |
+| 중복 관측 완화 | 최초 관측 인터페이스를 기준으로 주요 카운터 갱신 |
+| 동시 실행 대응 | `bpf_spin_lock()` 및 동일 Key 등록 경쟁 처리 |
+| Map 등록 실패 대응 | 설정에 따라 `direct_flows` Ring Buffer로 보조 전달 |
+| 커널과 사용자 공간의 역할 분리 | Kernel에서 집계, Go Agent에서 주기적 수집·변환·Export |
 
-특히 Ring Buffer는 **모든 패킷의 기본 전달 경로가 아니라**, Flow Map 등록 실패에 대응하는 보조 경로로 사용될 수 있다는 점이 인상적이었다.
+**Ring Buffer는 기본 Flow 경로가 아니다.** `flows.c`에서는 새로운 Flow를 Map에 등록하지 못한 일부 경우, 설정이 활성화되어 있으면 Ring Buffer를 사용한다. 처음에는 Ring Buffer가 모든 정보를 전달할 것으로 생각했는데, 실제 코드를 보니 **Map과 Ring Buffer가 역할을 나눠 사용**되고 있었다.
 
+또 한 가지 흥미로운 부분은 **공식 설계 문서와 현재 코드의 차이**였다. `docs/ebpf_implementation.md`에는 과거 v2 설계의 기본 Map을 Per-CPU Hash Map으로 설명하지만, 현재 살펴본 `maps_definition.h`에서는 기본 `aggregated_flows`가 `BPF_MAP_TYPE_HASH`다. 그래서 이번 글에서는 **실제 확인한 소스코드의 정의를 기준으로 설명**했다.
 
-## 8. 정리
+## 8. 정리 — 교재에서 배운 개념이 어떻게 연결됐을까?
 
-이번 분석을 통해 **패킷을 관측하는 것과 Flow 데이터를 만드는 것은 서로 다른 단계**라는 것을 이해했다.
+| 『Learning eBPF』에서 공부한 개념 | NetObserv에서 확인한 부분 |
+|---|---|
+| eBPF Hook / Program Section | TC/TCX의 패킷 관측 진입점과 `SEC(...)` |
+| BPF Map / Helper Function | `aggregated_flows`, `bpf_map_lookup_elem()` |
+| Verifier / 패킷 접근 범위 | `data`, `data_end`를 사용하는 헤더 분석 |
+| Kernel ↔ User Space | Go Fetcher의 Map 조회·삭제 및 Record 전달 |
 
-1. eBPF 프로그램이 TC/TCX Hook에서 패킷을 관측한다.
-2. 패킷의 공통 식별 정보로 같은 Flow인지 판단한다.
-3. BPF Map에 패킷 수와 바이트 수 등을 누적한다.
-4. Go Agent가 주기적으로 데이터를 가져와 Record로 변환하고 내보낸다.
+**TC/TCX Hook에서 관측 → `flow_id`로 통신 구분 → BPF Map 집계 → Go Agent가 조회·삭제 → Flow Record 변환·Export**라는 하나의 흐름으로 이어졌다.
 
-『Learning eBPF』에서 공부한 **Hook, BPF Map, Kernel/User Space 구분**이 실제 오픈소스에서 어떻게 연결되는지 확인할 수 있었다. 앞으로는 테스트 환경에서 Agent를 실행해 Flow가 실제로 어떻게 출력되는지도 검증해 보고 싶다.
+이번 분석으로 *패킷을 관측하는 것*과 *관측한 패킷을 통신별 통계로 만드는 것*이 다른 단계라는 점을 이해했다. 또한 실제 소스코드는 중복 관측과 동시 실행처럼 교재 예제보다 더 다양한 상황을 고려한다는 것도 알게 되었다.
+
+아직 Agent를 직접 실행해 Flow 출력을 검증한 것은 아니다. 다음에는 테스트 VM에서 트래픽을 발생시켜 실제로 Flow 통계가 생성되는지 확인해 보고 싶다.
+
+---
+
+### 참고 자료
+
+- [NetObserv eBPF Agent GitHub](https://github.com/netobserv/netobserv-ebpf-agent)
+- [Flow Capture 아키텍처](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/flows/architecture.md)
+- [eBPF 구현 설계 문서](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/ebpf_implementation.md)
+- Liz Rice, *Learning eBPF*
