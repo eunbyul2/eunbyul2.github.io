@@ -29,39 +29,78 @@ Agent에는 **Flow Capture(기본, `ENABLE_PCA=false`)**와 **Packet Capture(`EN
 
 > NetObserv Agent는 패킷을 전달하는 CNI가 아니라 **이미 발생하는 네트워크 통신을 관측하는 도구**다.
 
-## 3. 먼저 전체 흐름 이해하기
+## 3. 패킷이 Flow 데이터가 되는 전체 과정
+
+NetObserv eBPF Agent의 실제 코드를 분석하기 전에 전체 동작 구조부터 살펴봤다.
 
 ![NetObserv eBPF Agent의 데이터 흐름](/img/study-Learning_eBPF/netobserv-flow-infographic.png)
 
-```mermaid
-flowchart TD
-    A["네트워크 패킷"] --> B["TC / TCX Hook"]
-    B --> C["Kernel: flow_monitor()"]
-    C --> D["BPF Map: aggregated_flows"]
-    D --> E["Go Fetcher: 조회·삭제"]
-    E --> F["MapTracer: Record 변환"]
-    F --> G["Exporter: gRPC / Kafka / IPFIX / direct-flp"]
-```
+위 그림은 NetObserv의 기본 **Flow Capture 모드**를 나타낸 개념도다. 총 7개의 구간으로 나뉘어 있지만, 크게 보면 다음 4단계로 이해할 수 있다.
 
-- **Kernel Space:** 패킷을 관측하고 같은 통신의 패킷 수·바이트 수 등을 BPF Map에 누적한다.
-- **User Space(Go):** 누적된 정보를 일정 주기로 가져와 정리하고 외부에 전달한다.
+### 3-1. 네트워크 트래픽 발생과 패킷 관측 (①~③)
 
-### Packet과 Flow는 무엇이 다를까?
+Kubernetes에서 Pod A가 Pod B로 HTTP 요청을 보내면 네트워크 패킷이 발생한다.
+
+패킷은 Linux의 네트워크 경로를 따라 이동하며, 네트워크 인터페이스에 연결된 **TC/TCX Hook**에서 eBPF 프로그램이 패킷을 관측할 수 있다.
+
+- **Ingress:** 네트워크 인터페이스로 패킷이 들어오는 방향
+- **Egress:** 네트워크 인터페이스에서 패킷이 나가는 방향
+- **TC Hook:** 네트워크 패킷을 처리하는 지점으로, eBPF 프로그램을 연결할 수 있다.
+
+### 3-2. Kernel Space에서 Flow 통계 집계 (④~⑤)
+
+`bpf/flows/flows.c`의 `flow_monitor()`는 패킷의 헤더를 분석해 출발지·목적지 IP, 포트, 프로토콜 등 통신을 구분할 정보를 확인한다.
+
+이 정보를 바탕으로 **Flow ID**를 구성하고, `aggregated_flows`라는 BPF Hash Map에서 같은 Flow가 존재하는지 조회한다.
+
+- **기존 Flow가 있으면:** 패킷 수와 바이트 수 등의 통계를 갱신한다.
+- **새로운 Flow라면:** 통계 정보를 생성해 Map에 등록한다.
+
+즉, NetObserv는 패킷을 관측할 때마다 개별 기록을 User Space로 전송하기보다 **Kernel에서 먼저 같은 통신의 통계를 누적**한다.
+
+### 3-3. User Space에서 Flow 데이터 수집 (⑥)
+
+Go로 작성된 Agent는 설정된 주기에 따라 BPF Map에 누적된 Flow 데이터를 가져온다.
+
+`MapTracer`가 수집 작업을 요청하고, `Fetcher`가 실제 Map 항목을 조회·삭제한다.
+
+가져온 데이터는 `model.Record`로 변환되어 다음 처리 단계로 전달된다.
+
+또한 기본 Flow Map에 새로운 항목을 등록하지 못한 일부 상황에서는 설정에 따라 Ring Buffer를 보조 전달 경로로 사용할 수 있다.
+
+### 3-4. Flow 데이터 외부 전달 및 활용 (⑦)
+
+수집된 Flow Record는 Exporter를 통해 외부 시스템으로 전달할 수 있다.
+
+NetObserv는 설정에 따라 **gRPC, Kafka, IPFIX, direct-flp** 등의 출력 방식을 지원한다.
+
+전달된 정보는 Flow Logs, 트래픽 통계, 네트워크 통신 분석 및 시각화 등에 활용될 수 있다. 다만 실제 시각화는 후속 구성요소가 담당할 수 있다.
+
+### Packet과 Flow는 어떻게 다를까?
 
 - **Packet:** 네트워크를 지나는 개별 데이터 단위
-- **Flow:** 출발지·목적지 IP, 포트, 프로토콜 등의 조합으로 식별한 통신 흐름
+- **Flow:** 출발지·목적지 IP, 포트, 프로토콜 등의 정보로 구분한 통신 흐름
+
+예를 들어 동일한 Flow에 속하는 패킷 3개가 관측되었다고 가정해 보자.
 
 ```mermaid
-flowchart LR
-    P1["Packet 1 · 100 B"] --> ID["같은 Flow ID"]
-    P2["Packet 2 · 200 B"] --> ID
-    P3["Packet 3 · 150 B"] --> ID
+flowchart TD
+    P1["Packet 1: 100 B"] --> ID["동일한 Flow ID"]
+    P2["Packet 2: 200 B"] --> ID
+    P3["Packet 3: 150 B"] --> ID
     ID --> M["Flow 통계: 3 packets / 450 B"]
 ```
 
-동일한 Flow의 패킷 세 개가 관측되면 패킷마다 별도 기록을 보내는 대신 **하나의 Flow 항목에 통계를 누적**할 수 있다. 위 수치는 이해를 위한 예시다(샘플링 및 중복 관측 제외).
+실제 NetObserv는 같은 Flow의 패킷 수와 바이트 수를 BPF Map에 누적한다.
 
-[공식 설계 문서](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/ebpf_implementation.md)를 보면, 이전의 패킷별 Ring Buffer 전달 방식은 이벤트가 많아질수록 User Space 처리 부담이 커질 수 있었다. **Kernel에서 먼저 Flow별로 묶어 전달량을 줄이는 것**이 핵심 설계 의도다.
+따라서 **Flow 단위 집계란 같은 통신에 속하는 여러 패킷의 정보를 하나의 통계로 묶어 관리하는 방식**이라고 이해할 수 있다.
+
+위 수치는 샘플링과 중복 관측을 제외한 가상의 예시다.
+
+이런 구조를 사용하는 이유는 매 패킷마다 User Space로 이벤트를 전달하는 부담을 줄이기 위해서다. 관련 설계 배경은 공식 `docs/ebpf_implementation.md`에서도 확인할 수 있었다.
+
+이제 이 흐름이 실제 소스코드에서 어떻게 구현되었는지 살펴보겠다.
+
 
 ## 4. 분석한 소스코드
 
