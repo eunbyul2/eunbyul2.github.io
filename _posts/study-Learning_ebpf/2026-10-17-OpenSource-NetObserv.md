@@ -291,3 +291,26 @@ flowchart LR
 - [Flow Capture 아키텍처](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/flows/architecture.md)
 - [eBPF 구현 설계 문서](https://github.com/netobserv/netobserv-ebpf-agent/blob/main/docs/ebpf_implementation.md)
 - Liz Rice, *Learning eBPF*
+
+
+
+<script type="module">
+  import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+  document.querySelectorAll("pre > code.language-mermaid").forEach((code) => {
+    const container = document.createElement("div");
+    container.className = "mermaid";
+    container.textContent = code.textContent;
+    code.parentElement.replaceWith(container);
+  });
+
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: "default",
+    securityLevel: "strict"
+  });
+
+  await mermaid.run({
+    querySelector: ".mermaid"
+  });
+</script>
